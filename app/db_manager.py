@@ -109,12 +109,15 @@ class ArangoDatabaseManager:
     def get_all_documents(self, collection_name, limit = 100):
         """Return a list of all documents in the collection
         """
-        print(collection_name + '!!!!!!!!!!!!!!!!!!!!')
         if self.has_collection(collection_name):
             print(collection_name)
             collection = self.db.collection(collection_name)
-            return collection.all(skip = 0, limit = limit)
+            test = []
+            for i in collection.all(skip = 0, limit = limit):
+                test.append(i)
+            return test
         else:
+            print("no collection")
             return list()
                                         
     
