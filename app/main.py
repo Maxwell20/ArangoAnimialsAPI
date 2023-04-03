@@ -44,6 +44,9 @@ Todo:
 """
 
 from fastapi import FastAPI
+import json
+from .arango_auth import  ArangoCredentials, ArangoCredentialsEnvironmentVarLoader
+from .db_manager import ArangoDatabaseManager
 
 app = FastAPI()
 
@@ -76,4 +79,18 @@ async def users():
     ]
 
     return users
+
+#TODO: Pass username and password through api
+@app.get("/all_animals")
+async def all_animals():
+    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    database_manager = ArangoDatabaseManager(
+        database_name = "SightingsDatabase",
+        username = 'root',
+        password = 'adbpwd',
+        host = "http://localhost:1234/"
+    )
+
+    all_docs = database_manager.get_all_documents('fauna_sightings')
+    return all_docs
 #UNCLASSIFIED
