@@ -140,7 +140,7 @@ class ArangoDatabaseManager:
             )
         return result
     
-    def get_specified_documents(self, collection_name, startTime= "", endTime= "", long = None, lat = None country = "", type = ""):
+    def get_specified_documents(self, collection_name, startTime= "", endTime= "", long = None, lat = None, country = "", type = ""):
         result = list()
         # Define the query parameters
         query_params = {
