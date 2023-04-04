@@ -83,6 +83,8 @@ async def users():
 #TODO: Pass username and password through api
 @app.get("/all_animals")
 async def all_animals():
+# async def all_animals(user: str, pwd: str | None = None):
+
     # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     database_manager = ArangoDatabaseManager(
         database_name = "SightingsDatabase",
@@ -93,4 +95,19 @@ async def all_animals():
 
     all_docs = database_manager.get_all_documents('fauna_sightings')
     return all_docs
+
+#TODO: Pass username and password through api
+@app.get("/get_animals")
+async def get_animals(collection: str, startTime: str, endTime: str, long: float, lat: float, country:str, type:str):
+
+    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    database_manager = ArangoDatabaseManager(
+        database_name = "SightingsDatabase",
+        username = 'root',
+        password = 'adbpwd',
+        host = "http://localhost:1234/"
+    )
+
+    docs = database_manager.get_specified_documents('fauna_sightings', startTime, endTime, long, lat, country, type)
+    return docs
 #UNCLASSIFIED

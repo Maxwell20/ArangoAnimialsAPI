@@ -24,6 +24,7 @@ class ArangoDatabaseManager:
         """
         self.client = ArangoClient(hosts=self.host)
         self.sys_db = self.client.db(
+            #TODO: change back to database name
             "_system",
             username = self.username,
             password = self.password
@@ -139,4 +140,49 @@ class ArangoDatabaseManager:
             )
         return result
     
+    def get_specified_documents(self, collection_name, startTime= "", endTime= "", long = None, lat = None country = "", type = ""):
+        result = list()
+        # Define the query parameters
+        query_params = {
+            "start_time": startTime,
+            "end_time": endTime,
+            "latitude": lat,
+            "longitude": long,
+            "country": country,
+            "species": type
+        }
+        
+        if self.has_collection(collection_name):
+            # Define the name of the collection to query
+            collection = self.db.collection(collection_name)
+            # Build the AQL query string
+            aql_query = """
+                        FOR doc IN @@collection
+                        FILTER (!@start_time || doc.timestamp >= @start_time)
+                        FILTER (!@end_time || doc.timestamp <= @end_time)
+                        FILTER (!@latitude || doc.latitude == @latitude OR doc.latitude == null)
+                        FILTER (!@longitude || doc.longitude == @longitude OR doc.longitude == null)
+                        FILTER (!@country || doc.country == @country OR doc.country == null)
+                        FILTER (!@species || doc.species == @species OR doc.species == null)
+                        RETURN doc
+                        """
+            # Prepare the query for execution
+            result = self.aql_execute(
+                aql_query,
+                    bind_vars={
+                        "@collection": collection_name,
+                        **query_params
+                     }
+            )
+
+            print("Populated query: \n", aql_query.format(
+            start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
+            end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))",
+            latitude_filter="(!@latitude || doc.latitude == @latitude)",
+            longitude_filter="(!@longitude || doc.longitude == @longitude)"
+                ))
+            print("Query parameters: \n", query_params)
+            print(result)
+
+        return result
     
