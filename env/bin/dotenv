@@ -1,4 +1,4 @@
-#!/home/max/prj/colsa/fastAPI/env/bin/python
+#!/home/max/prj/colsa/ArangoAnimalsAPI/env/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys
