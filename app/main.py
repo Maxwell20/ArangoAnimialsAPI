@@ -56,29 +56,20 @@ async def root():
 
 
 #example only remove later
-@app.get("/users")
-async def users():
-    users = [
-        {
-            "name": "Mars Kule",
-            "age": 25,
-            "city": "Lagos, Nigeria"
-        },
+@app.get("/get_recent")
+async def get_recent(hours_ago:str | None = None)
+    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    database_manager = ArangoDatabaseManager(
+        database_name = "SightingsDatabase",
+        username = 'root',
+        password = 'adbpwd',
+        host = "http://localhost:1234/"
+    )
 
-        {
-            "name": "Mercury Lume",
-            "age": 23,
-            "city": "Abuja, Nigeria"
-        },
+    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago= "" )
+    return docs
+#UNCLASSIFIED
 
-         {
-            "name": "Jupiter Dume",
-            "age": 30,
-            "city": "Kaduna, Nigeria"
-        }
-    ]
-
-    return users
 
 #TODO: Pass username and password through api
 @app.get("/all_animals")
