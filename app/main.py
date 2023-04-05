@@ -98,7 +98,7 @@ async def all_animals():
 
 #TODO: Pass username and password through api
 @app.get("/get_animals")
-async def get_animals(collection: str, startTime: str, endTime: str, long: float, lat: float, country:str, type:str):
+async def get_animals(collection: str, startTime: str  | None = None, endTime: str | None = None, long: float | None = None, lat: float | None = None, country:str | None = None, type:str | None = None):
 
     # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     database_manager = ArangoDatabaseManager(
