@@ -186,3 +186,123 @@ class ArangoDatabaseManager:
 
         return result
     
+
+#below is 
+def arango_queries(database_name):
+
+    # Query events or data sources with type X
+    query = '''
+        FOR doc IN collection_name
+        FILTER doc.type == "X"
+        RETURN doc
+    '''
+    result = db.aql.execute(query)
+
+    # Query events or data sources in date range
+    query = '''
+        FOR doc IN collection_name
+        FILTER doc.datetime >= start_date AND doc.datetime <= end_date
+        RETURN doc
+    '''
+    result = db.aql.execute(query)
+
+    # Query events or data sources in lat/long polygon
+    query = '''
+        FOR doc IN collection_name
+        FILTER GEO_CONTAINS(polygon, [doc.lon, doc.lat])
+        RETURN doc
+    '''
+    result = db.aql.execute(query)
+
+    # Query events or data sources by country
+    query = '''
+        FOR doc IN collection_name
+        FILTER doc.country == "country_name"
+        RETURN doc
+    '''
+    result = db.aql.execute(query)
+
+    # Query events or data sources with no edges
+    query = '''
+        FOR doc IN collection_name
+        FILTER LENGTH(DOC(collection_name, doc._id, "inbound_edges")) == 0
+        RETURN doc
+    '''
+    result = db.aql.execute(query)
+
+    # Query all data sources B that are associated with an event
+    query = '''
+        FOR v, e, p IN 1..1 OUTBOUND 'event_id' edge_collection_name
+        FILTER p.edges[*].type ALL == "data source B"
+        RETURN DISTINCT v
+    '''
+    result = db.aql.execute(query)
+
+    # Query all data sources B that are associated with an instance of data source A
+    query = '''
+        FOR v1, e1, p1 IN 1..1 OUTBOUND 'data source A id' edge_collection_name
+        FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
+        FILTER p2.edges[*].type ALL == "data source B"
+        RETURN DISTINCT v2
+    '''
+    result = db.aql.execute(query)
+
+    # Query all instances of data source B that have connections to data source A
+    query = '''
+        FOR v1, e1, p1 IN 1..1 OUTBOUND 'data source A id' edge_collection_name
+        FOR v2, e2, p2 IN 1..1 OUTBOUND 'data source B id' edge_collection_name
+        FILTER p1.edges[*].type ALL == "data source A" AND p2.edges[*].type ALL == "data source B"
+        RETURN DISTINCT v2
+    '''
+    result = db.aql.execute(query)
+
+    # Query all events that have combinations of data source A, B and C
+    query = '''
+        FOR v1, e1, p1 IN 1..1 OUTBOUND 'event_id' edge_collection_name
+        FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
+        FOR v3, e3, p3 IN 1..1 OUTBOUND v2._id edge_collection_name
+        FILTER p1.edges[*].type ALL == "data source A" AND
+               p2.edges[*].type ALL == "data source B" AND
+               p3.edges[*].type ALL == "data source C"
+        RETURN DISTINCT
+        '''
+    
+#maybe this will work?
+# This query uses the ANY SHORTEST_PATH traversal to traverse 
+# the graph from the starting event_id vertex to all vertices
+#  that satisfy the specified conditions. The FILTER statements 
+# are used to filter the vertices based on their type, datetime, 
+# location, country, and edge connections. The RETURN DISTINCT v 
+# statement is used to return only the unique vertices that satisfy 
+# the conditions.
+# Note: that you will need to replace the placeholder values 
+# (event_id, collection_name, etc.) with the actual names and IDs
+#  of your ArangoDB collections and vertices. Also, you will need 
+# to provide the values for the query parameters
+#  (start_date, end_date, polygon, country_name, etc.) at runtime.
+def arango_query(database_name):
+
+    # Construct the query
+    query = '''
+        FOR v, e, p IN ANY SHORTEST_PATH
+            'event_id'
+            TO
+            FILTER v.type IN ['X', 'Y', 'Z']
+            AND v.datetime >= start_date
+            AND v.datetime <= end_date
+            AND GEO_CONTAINS(polygon, [v.lon, v.lat])
+            AND v.country == 'country_name'
+            AND LENGTH(DOC(collection_name, v._id, "inbound_edges")) == 0
+            AND (
+                (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL != 'data source A')
+                OR (e.edges[*].type ALL == 'data source B' AND p.vertices[*].type ALL != 'data source B')
+                OR (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL == 'data source A')
+            )
+            RETURN DISTINCT v
+    '''
+
+    # Execute the query
+    result = db.aql.execute(query)
+
+    # Return the result
+    return result
