@@ -57,7 +57,7 @@ async def root():
 
 #example only remove later
 @app.get("/get_recent")
-async def get_recent(hours_ago:str | None = None)
+async def get_recent(hours_ago:str | None = None):
     # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     database_manager = ArangoDatabaseManager(
         database_name = "SightingsDatabase",
