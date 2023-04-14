@@ -3,7 +3,7 @@
     it.  
 """
 from arango import ArangoClient
-from .datetime_utils import start_end_times_from_hoursago
+from datetime_utils import *
 
 
 class ArangoDatabaseManager:
@@ -24,14 +24,13 @@ class ArangoDatabaseManager:
         """
         self.client = ArangoClient(hosts=self.host)
         self.sys_db = self.client.db(
-            #TODO: change back to database name
             "_system",
             username = self.username,
             password = self.password
         )
 
-        if not self.sys_db.has_database(self.database_name):
-            self.sys_db.create_database(self.database_name)
+        # if not self.sys_db.has_database(self.database_name):
+        #     self.sys_db.create_database(self.database_name)
 
         self.db = self.client.db(
             self.database_name,
@@ -140,7 +139,7 @@ class ArangoDatabaseManager:
             )
         return result
     
-    def get_specified_documents(self, collection_name, startTime= "", endTime= "", long = None, lat = None, country = "", type = ""):
+    def get_specified_documents(self, collection_name, bound = "", startTime= "", endTime= "", long = None, lat = None, country = "", type = ""):
         result = list()
         # Define the query parameters
         query_params = {
@@ -186,3 +185,55 @@ class ArangoDatabaseManager:
 
         return result
     
+
+    
+#maybe this will work?
+# This query uses the ANY SHORTEST_PATH traversal to traverse 
+# the graph from the starting event_id vertex to all vertices
+#  that satisfy the specified conditions. The FILTER statements 
+# are used to filter the vertices based on their type, datetime, 
+# location, country, and edge connections. The RETURN DISTINCT v 
+# statement is used to return only the unique vertices that satisfy 
+# the conditions.
+# Note: that you will need to replace the placeholder values 
+# (event_id, collection_name, etc.) with the actual names and IDs
+#  of your ArangoDB collections and vertices. Also, you will need 
+# to provide the values for the query parameters
+#  (start_date, end_date, polygon, country_name, etc.) at runtime.
+def complex_query(self, database_name):
+
+    # # Query all events that have combinations of data source A, B and C
+    # query = '''
+    #     FOR v1, e1, p1 IN 1..1 OUTBOUND 'event_id' edge_collection_name
+    #     FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
+    #     FOR v3, e3, p3 IN 1..1 OUTBOUND v2._id edge_collection_name
+    #     FILTER p1.edges[*].type ALL == "data source A" AND
+    #            p2.edges[*].type ALL == "data source B" AND
+    #            p3.edges[*].type ALL == "data source C"
+    #     RETURN DISTINCT
+    #     '''
+
+    # Construct the query
+    query = '''
+        FOR v, e, p IN ANY SHORTEST_PATH
+            'event_id'
+            TO
+            FILTER v.type IN ['X', 'Y', 'Z']
+            AND v.datetime >= start_date
+            AND v.datetime <= end_date
+            AND GEO_CONTAINS(polygon, [v.lon, v.lat])
+            AND v.country == 'country_name'
+            AND LENGTH(DOC(collection_name, v._id, "inbound_edges")) == 0
+            AND (
+                (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL != 'data source A')
+                OR (e.edges[*].type ALL == 'data source B' AND p.vertices[*].type ALL != 'data source B')
+                OR (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL == 'data source A')
+            )
+            RETURN DISTINCT v
+    '''
+
+    # Execute the query
+    result = self.db.aql.execute(query)
+
+    # Return the result
+    return result
