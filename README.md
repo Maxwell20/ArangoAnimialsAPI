@@ -3,8 +3,10 @@
 
     source env/bin/activate
 
-## to run the app from the main project directory
+## to run the app from the main project directory : depricated - keeping for reference
     uvicorn app.main:app --reload
+## to run the app from the main project directory : use this instead since we initialize objects in main and main starts uvicorn
+    python main.py
 
 point your browser to http://127.0.0.1:8000 to verify the app is running
 you can navigate to /docs to view the api capabilities this page is generated automatically by FastAPI. This will be useful for development testing.

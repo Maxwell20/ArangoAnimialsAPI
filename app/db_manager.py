@@ -3,7 +3,7 @@
     it.  
 """
 from arango import ArangoClient
-from .datetime_utils import start_end_times_from_hoursago
+from datetime_utils import *
 
 
 class ArangoDatabaseManager:
@@ -140,7 +140,7 @@ class ArangoDatabaseManager:
             )
         return result
     
-    def get_specified_documents(self, collection_name, startTime= "", endTime= "", long = None, lat = None, country = "", type = ""):
+    def get_specified_documents(self, collection_name, bound = "", startTime= "", endTime= "", long = None, lat = None, country = "", type = ""):
         result = list()
         # Define the query parameters
         query_params = {
@@ -187,85 +187,6 @@ class ArangoDatabaseManager:
         return result
     
 
-#below is 
-def arango_queries(database_name):
-
-    # Query events or data sources with type X
-    query = '''
-        FOR doc IN collection_name
-        FILTER doc.type == "X"
-        RETURN doc
-    '''
-    result = db.aql.execute(query)
-
-    # Query events or data sources in date range
-    query = '''
-        FOR doc IN collection_name
-        FILTER doc.datetime >= start_date AND doc.datetime <= end_date
-        RETURN doc
-    '''
-    result = db.aql.execute(query)
-
-    # Query events or data sources in lat/long polygon
-    query = '''
-        FOR doc IN collection_name
-        FILTER GEO_CONTAINS(polygon, [doc.lon, doc.lat])
-        RETURN doc
-    '''
-    result = db.aql.execute(query)
-
-    # Query events or data sources by country
-    query = '''
-        FOR doc IN collection_name
-        FILTER doc.country == "country_name"
-        RETURN doc
-    '''
-    result = db.aql.execute(query)
-
-    # Query events or data sources with no edges
-    query = '''
-        FOR doc IN collection_name
-        FILTER LENGTH(DOC(collection_name, doc._id, "inbound_edges")) == 0
-        RETURN doc
-    '''
-    result = db.aql.execute(query)
-
-    # Query all data sources B that are associated with an event
-    query = '''
-        FOR v, e, p IN 1..1 OUTBOUND 'event_id' edge_collection_name
-        FILTER p.edges[*].type ALL == "data source B"
-        RETURN DISTINCT v
-    '''
-    result = db.aql.execute(query)
-
-    # Query all data sources B that are associated with an instance of data source A
-    query = '''
-        FOR v1, e1, p1 IN 1..1 OUTBOUND 'data source A id' edge_collection_name
-        FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
-        FILTER p2.edges[*].type ALL == "data source B"
-        RETURN DISTINCT v2
-    '''
-    result = db.aql.execute(query)
-
-    # Query all instances of data source B that have connections to data source A
-    query = '''
-        FOR v1, e1, p1 IN 1..1 OUTBOUND 'data source A id' edge_collection_name
-        FOR v2, e2, p2 IN 1..1 OUTBOUND 'data source B id' edge_collection_name
-        FILTER p1.edges[*].type ALL == "data source A" AND p2.edges[*].type ALL == "data source B"
-        RETURN DISTINCT v2
-    '''
-    result = db.aql.execute(query)
-
-    # Query all events that have combinations of data source A, B and C
-    query = '''
-        FOR v1, e1, p1 IN 1..1 OUTBOUND 'event_id' edge_collection_name
-        FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
-        FOR v3, e3, p3 IN 1..1 OUTBOUND v2._id edge_collection_name
-        FILTER p1.edges[*].type ALL == "data source A" AND
-               p2.edges[*].type ALL == "data source B" AND
-               p3.edges[*].type ALL == "data source C"
-        RETURN DISTINCT
-        '''
     
 #maybe this will work?
 # This query uses the ANY SHORTEST_PATH traversal to traverse 
@@ -280,7 +201,18 @@ def arango_queries(database_name):
 #  of your ArangoDB collections and vertices. Also, you will need 
 # to provide the values for the query parameters
 #  (start_date, end_date, polygon, country_name, etc.) at runtime.
-def arango_query(database_name):
+def complex_query(self, database_name):
+
+    # # Query all events that have combinations of data source A, B and C
+    # query = '''
+    #     FOR v1, e1, p1 IN 1..1 OUTBOUND 'event_id' edge_collection_name
+    #     FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
+    #     FOR v3, e3, p3 IN 1..1 OUTBOUND v2._id edge_collection_name
+    #     FILTER p1.edges[*].type ALL == "data source A" AND
+    #            p2.edges[*].type ALL == "data source B" AND
+    #            p3.edges[*].type ALL == "data source C"
+    #     RETURN DISTINCT
+    #     '''
 
     # Construct the query
     query = '''
@@ -302,7 +234,7 @@ def arango_query(database_name):
     '''
 
     # Execute the query
-    result = db.aql.execute(query)
+    result = self.db.aql.execute(query)
 
     # Return the result
     return result

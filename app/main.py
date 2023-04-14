@@ -45,8 +45,11 @@ Todo:
 
 from fastapi import FastAPI
 import json
-from .arango_auth import  ArangoCredentials, ArangoCredentialsEnvironmentVarLoader
-from .db_manager import ArangoDatabaseManager
+from arango_auth import *
+# from .arango_auth import  ArangoCredentials, ArangoCredentialsEnvironmentVarLoader
+from db_manager import *
+import uvicorn 
+from config_loader import *
 
 app = FastAPI()
 
@@ -57,48 +60,40 @@ async def root():
 
 #example only remove later
 @app.get("/get_recent")
-async def get_recent(hours_ago:str | None = None):
-    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    database_manager = ArangoDatabaseManager(
-        database_name = "SightingsDatabase",
-        username = 'root',
-        password = 'adbpwd',
-        host = "http://localhost:1234/"
-    )
-
-    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago= "" )
+async def get_recent(hours_ago:int | None = None):
+    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago= 0 )
     return docs
-#UNCLASSIFIED
+
 
 
 #TODO: Pass username and password through api
 @app.get("/all_animals")
 async def all_animals():
-# async def all_animals(user: str, pwd: str | None = None):
-
-    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    database_manager = ArangoDatabaseManager(
-        database_name = "SightingsDatabase",
-        username = 'root',
-        password = 'adbpwd',
-        host = "http://localhost:1234/"
-    )
-
     all_docs = database_manager.get_all_documents('fauna_sightings')
     return all_docs
 
 #TODO: Pass username and password through api
 @app.get("/get_animals")
 async def get_animals(collection: str, startTime: str  | None = None, endTime: str | None = None, long: float | None = None, lat: float | None = None, country:str | None = None, type:str | None = None):
-
-    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    database_manager = ArangoDatabaseManager(
-        database_name = "SightingsDatabase",
-        username = 'root',
-        password = 'adbpwd',
-        host = "http://localhost:1234/"
-    )
-
     docs = database_manager.get_specified_documents('fauna_sightings', startTime, endTime, long, lat, country, type)
     return docs
+
+if __name__ == '__main__':
+    #start from main: python main.py
+    #TODO: for deployment load env variables instead of testloader
+    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    global credentials, database_manager
+
+    credentials = ArangoCredentialsTestLoader().build_credentials()
+    database_manager = ArangoDatabaseManager(
+        database_name = credentials.database,
+        username = credentials.username,
+        password = credentials.password,
+        host = credentials.host
+    )
+    #TODO: for deployment load env variables instead of testloader
+    #config = UvicornConfigEnvironmentVarLoader().build_config()
+    config = UvicornConfigTestLoader().build_config()
+    uvicorn.run(app, host=config.host, port=config.port)
+
 #UNCLASSIFIED

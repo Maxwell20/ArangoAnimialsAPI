@@ -5,7 +5,7 @@ from collections import namedtuple
 
 ArangoCredentials = namedtuple(
     "ArangoCredentials",
-    "host username password "
+    "host username password database"
 )
 
 class BaseArangoCredentialsLoader(ABC):
@@ -24,11 +24,12 @@ class ArangoCredentialsTestLoader(BaseArangoCredentialsLoader):
         """Just build a dummy credentials object
         """
         return ArangoCredentials(
-            host = "TestHost",
-            username = "TestUser",
-            password = "TestPassword"
+            host = "http://localhost:1234/",
+            username = 'root',
+            password = 'adbpwd',
+            database = "SightingsDatabase"
         )
-
+#this should load from the docker env variables
 class ArangoCredentialsEnvironmentVarLoader(BaseArangoCredentialsLoader):
     """ Load Arango credentials from the environment
     """
@@ -39,11 +40,13 @@ class ArangoCredentialsEnvironmentVarLoader(BaseArangoCredentialsLoader):
             host = os.environ["ARANGO_HOST"]
             username = os.environ["ARANGO_USERNAME"]
             password = os.environ["ARANGO_PASSWORD"]
+            database = os.environ["ARANGO_DATABASE"]
 
             return ArangoCredentials(
                 host = host,
                 username = username,
-                password = password
+                password = password,
+                database = database
             )
         # Probably want to think about how we want to fail here
         except Exception as e:
