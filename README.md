@@ -6,6 +6,7 @@
 ## to run the app from the main project directory : depricated - keeping for reference
     uvicorn app.main:app --reload
 ## to run the app from the main project directory : use this instead since we initialize objects in main and main starts uvicorn
+### note: the environment variables in the .env file may only work from vscode for development, in deployment they will come from the docker file
     python main.py
 
 point your browser to http://127.0.0.1:8000 to verify the app is running
@@ -19,10 +20,11 @@ then to verify the image is built run
     docker image ls
 you should then see your image listed
 
-## to run the container run
+## to run and create the container run
     docker container run --publish 80:80 --name app-container app-image
-
-verify the app is running on http://localhost:80
+## to run  and create the container and connect to arango on localhost
+    dodocker container run --publish 80:80 --network="host" --name app-container app-image
+verify the app is running on http://localhost:80/docs or http://172.17.0.1/docs
 ## to update the required dependancies for the docker image
 generate a new requirements.txt file 
 

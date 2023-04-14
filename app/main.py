@@ -80,20 +80,15 @@ async def get_animals(collection: str, startTime: str  | None = None, endTime: s
 
 if __name__ == '__main__':
     #start from main: python main.py
-    #TODO: for deployment load env variables instead of testloader
-    # credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     global credentials, database_manager
-
-    credentials = ArangoCredentialsTestLoader().build_credentials()
+    credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    config = UvicornConfigEnvironmentVarLoader().build_config()
     database_manager = ArangoDatabaseManager(
         database_name = credentials.database,
         username = credentials.username,
         password = credentials.password,
         host = credentials.host
     )
-    #TODO: for deployment load env variables instead of testloader
-    #config = UvicornConfigEnvironmentVarLoader().build_config()
-    config = UvicornConfigTestLoader().build_config()
-    uvicorn.run(app, host=config.host, port=config.port)
+    uvicorn.run(app, host=config.host, port=int(config.port))
 
 #UNCLASSIFIED

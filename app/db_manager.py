@@ -24,14 +24,13 @@ class ArangoDatabaseManager:
         """
         self.client = ArangoClient(hosts=self.host)
         self.sys_db = self.client.db(
-            #TODO: change back to database name
             "_system",
             username = self.username,
             password = self.password
         )
 
-        if not self.sys_db.has_database(self.database_name):
-            self.sys_db.create_database(self.database_name)
+        # if not self.sys_db.has_database(self.database_name):
+        #     self.sys_db.create_database(self.database_name)
 
         self.db = self.client.db(
             self.database_name,

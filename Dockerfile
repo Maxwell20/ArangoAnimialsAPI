@@ -8,7 +8,7 @@ ENV ARANGO_USERNAME="root"
 ENV ARANGO_PASSWORD="adbpwd"
 #change these to update the uvicorn prot and host
 ENV UVICORN_HOST="0.0.0.0"
-ENV UVICORN_PORT=8000
+ENV UVICORN_PORT=80
 
 RUN mkdir /code
 
@@ -19,7 +19,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-#change this to change the host and port the api will run on
-CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port=80"]
-# CMD ["python", "app.main.py"]
+#change this to change the host and port the api will run on - Depricated use main.py
+# CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port=80"]
+CMD ["python", "app/main.py"]
 
