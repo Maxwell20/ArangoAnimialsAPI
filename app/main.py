@@ -61,7 +61,7 @@ async def root():
 #example only remove later
 @app.get("/get_recent")
 async def get_recent(hours_ago:int | None = None):
-    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago= 0 )
+    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago = 0 )
     return docs
 
 
@@ -74,8 +74,20 @@ async def all_animals():
 
 #TODO: Pass username and password through api
 @app.get("/get_animals")
-async def get_animals(collection: str, startTime: str  | None = None, endTime: str | None = None, long: float | None = None, lat: float | None = None, country:str | None = None, type:str | None = None):
-    docs = database_manager.get_specified_documents('fauna_sightings', startTime, endTime, long, lat, country, type)
+async def get_animals(  collections: str,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1:float | None = "",
+                        attribute2:float | None = "",
+                        include_edges:bool | None = ""):
+    collections = collections.split(",")
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1, attribute2, include_edges)
     return docs
 
 if __name__ == '__main__':
