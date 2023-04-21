@@ -49,7 +49,7 @@ from collections import namedtuple
 
 UvicornConfig = namedtuple(
     "UvicornConfig",
-    "host port"
+    "host port ssl_certfile ssl_keyfile ssl_cert_reqs ssl_ca_certs"
 )
 
 class BaseUvicornConfigLoader(ABC):
@@ -69,7 +69,7 @@ class UvicornConfigTestLoader(BaseUvicornConfigLoader):
         """
         return UvicornConfig(
             host = "0.0.0.0",
-            port = 8000
+            port = 8000          
         )
 #this should load from the docker env variables
 class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
@@ -81,10 +81,18 @@ class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
         try:
             host = os.environ["UVICORN_HOST"]
             port = os.environ["UVICORN_PORT"]
+            ssl_certfile = os.environ["UVICORN_ssl-certfile"]
+            ssl_keyfile = os.environ["UVICORN_ssl-keyfile"]
+            ssl_cert_reqs = os.environ["UVICORN_ssl-cert-reqs"]
+            ssl_ca_certs = os.environ["UVICORN_ssl-ca-certs"]
 
             return UvicornConfig(
                 host = host,
-                port = port
+                port = port,
+                ssl_certfile = ssl_certfile,
+                ssl_keyfile = ssl_keyfile,
+                ssl_cert_reqs = ssl_cert_reqs,
+                ssl_ca_certs = ssl_ca_certs,
             )
         # Probably want to think about how we want to fail here
         except Exception as e:

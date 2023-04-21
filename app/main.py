@@ -89,6 +89,12 @@ if __name__ == '__main__':
         password = credentials.password,
         host = credentials.host
     )
-    uvicorn.run(app, host=config.host, port=int(config.port))
+    print(config.ssl_ca_certs)
+    print(config.ssl_cert_reqs)
+    print(config.ssl_keyfile)
+    print(config.ssl_certfile)
+    
+    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile)
 
 #UNCLASSIFIED
+ 
