@@ -15,7 +15,6 @@ __status__ = "development"
 from arango import ArangoClient
 from datetime_utils import *
 
-
 class ArangoDatabaseManager:
     """Arango database management object
     """
@@ -150,7 +149,7 @@ class ArangoDatabaseManager:
         return result
     
 
-    def get_specified_documents(self, collection_names, startTime="", endTime="", longStart="", longEnd="", latStart="", latEnd="", country="", type="", attribute1 = "", attribute2 = "",  include_edges=""):
+    def get_specified_documents(self, collection_names, startTime="", endTime="", longStart="", longEnd="", latStart="", latEnd="", country="", type="", attribute1Start = "", attribute1End = "", attribute2Start = "", attribute2End = "", include_edges=""):
         result = []
 
         # Define the query parameters
@@ -163,8 +162,10 @@ class ArangoDatabaseManager:
             "longEnd": longEnd,
             "country": country,
             "species": type,
-            "attribute1": attribute1,
-            "attribute2": attribute2,
+            "attribute1Start": attribute1Start,
+            "attribute1End": attribute1End,
+            "attribute2Start": attribute2Start,
+            "attribute2End": attribute2End,
             "include_edges": include_edges
         }
         # collections = collection_names
@@ -186,10 +187,10 @@ class ArangoDatabaseManager:
                                 FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 FILTER (!@country || doc.country == @country)
                                 FILTER (!@species || doc.species == @species)
-                                FILTER (!@attribute1 || doc.attribute1 >= @attribute1)
-                                FILTER (!@attribute1 || doc.attribute1 <= @attribute1)
-                                FILTER (!@attribute2|| doc.attribute2 >= @attribute2)
-                                FILTER (!@attribute2 || doc.attribute2 <= @attribute2)
+                                FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
                                 LET edges = @include_edges ? (
                                 FOR e IN @@collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
                                 RETURN {doc, edges}
