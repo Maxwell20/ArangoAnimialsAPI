@@ -44,9 +44,7 @@ Todo:
 """
 
 from fastapi import FastAPI
-import json
 from arango_auth import *
-# from .arango_auth import  ArangoCredentials, ArangoCredentialsEnvironmentVarLoader
 from db_manager import *
 import uvicorn 
 from config_loader import *
@@ -83,12 +81,27 @@ async def get_animals(  collections: str,
                         latEnd: float | None = "", 
                         country:str | None = "",
                         type:str | None = "",
-                        attribute1:float | None = "",
-                        attribute2:float | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
                         include_edges:bool | None = ""):
     collections = collections.split(",")
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1, attribute2, include_edges)
+    
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, include_edges)
+
     return docs
+
+def authenticate_to_db():
+    global credentials, database_manager
+    credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    config = UvicornConfigEnvironmentVarLoader().build_config()
+    database_manager = ArangoDatabaseManager(
+        database_name = credentials.database,
+        username = credentials.username,
+        password = credentials.password,
+        host = credentials.host
+    )
 
 if __name__ == '__main__':
     #start from main: python main.py

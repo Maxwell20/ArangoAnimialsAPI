@@ -1,3 +1,12 @@
+__author__ = "?"
+__copyright__ = ""
+__credits__ = [" "]
+__license__ = ""
+__version__ = ""
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
+#UNCLASSIFIED
 import os
 
 from abc import ABC, abstractmethod
@@ -52,3 +61,4 @@ class ArangoCredentialsEnvironmentVarLoader(BaseArangoCredentialsLoader):
         except Exception as e:
             raise e
 
+#UNCLASSIFIED
