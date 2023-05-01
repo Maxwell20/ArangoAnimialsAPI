@@ -1,5 +1,14 @@
+__author__ = "?"
+__copyright__ = ""
+__credits__ = [" "]
+__license__ = ""
+__version__ = ""
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
 """Datetime utilities
 """
+#UNCLASSIFIED
 import datetime
 
 standard_datetime_format = "%Y-%m-%d %H:%M:%S"
@@ -38,3 +47,4 @@ def start_end_times_from_hoursago(hoursago: int=0):
     start_str = then.strftime(standard_datetime_format)
     end_str = now.strftime(standard_datetime_format)
     return start_str, end_str
+#UNCLASSIFIED

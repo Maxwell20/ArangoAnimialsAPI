@@ -1,10 +1,19 @@
+__author__ = "Maxwell Twente"
+__copyright__ = ""
+__credits__ = ["Maxwell Twente, "]
+__license__ = ""
+__version__ = ""
+__maintainer__ = "Maxwell Twente"
+__email__ = "mtwente@colsa.com"
+__status__ = "development"
+
+#UNCLASSIFIED
 """ Base classes and functionality for database management.
     This is similar to what we use but you don't have to use
     it.  
 """
 from arango import ArangoClient
 from datetime_utils import *
-
 
 class ArangoDatabaseManager:
     """Arango database management object
@@ -139,251 +148,8 @@ class ArangoDatabaseManager:
             )
         return result
     
-    # def get_specified_documents(self, collection_name, bound = "", startTime= "", endTime= "", longStart = None, longEnd = None, latStart = None, latEnd = None, country = "", type = ""):
-    #     result = list()
-    #     # Define the query parameters
-    #     query_params = {
-    #         "start_time": startTime,
-    #         "end_time": endTime,
-    #         "latStart": latStart,
-    #         "latEnd": latEnd,
-    #         "longStart": longStart,
-    #         "longEnd": longEnd,
-    #         "country": country,
-    #         "species": type
-    #     }
-        
-    #     if self.has_collection(collection_name):
-    #         # Define the name of the collection to query
-    #         collection = self.db.collection(collection_name)
-    #         # Build the AQL query string
-    #         aql_query = """
-    #                     FOR doc IN @@collection
-    #                     FILTER (!@start_time || doc.timestamp >= @start_time OR doc.latitude == null)
-    #                     FILTER (!@end_time || doc.timestamp <= @end_time OR doc.latitude == null)
-    #                     FILTER (!@latitude || doc.latitude >= @latStart OR doc.latitude == null)
-    #                     FILTER (!@latitude || doc.latitude <= @latEnd OR doc.latitude == null)
-    #                     FILTER (!@longitude || doc.longitude >= @longStart OR doc.longitude == null)
-    #                     FILTER (!@longitude || doc.longitude <= @longEnd OR doc.longitude == null)                     
-    #                     FILTER (!@country || doc.country == @country OR doc.country == null)
-    #                     FILTER (!@species || doc.species == @species OR doc.species == null)
-    #                     RETURN doc
-    #                     """
-    #         # Prepare the query for execution
-    #         result = self.aql_execute(
-    #             aql_query,
-    #                 bind_vars={
-    #                     "@collection": collection_name,
-    #                     **query_params
-    #                  }
-    #         )
 
-    #         print("Populated query: \n", aql_query.format(
-    #         start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
-    #         end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))",
-    #         latitude_filter="(!@latitude || doc.latitude == @latitude)",
-    #         longitude_filter="(!@longitude || doc.longitude == @longitude)"
-    #             ))
-    #         print("Query parameters: \n", query_params)
-    #         print(result)
-
-    #     return result
-    
-# def get_specified_documents(self, collection_name, bound="", startTime="", endTime="", longStart=None, longEnd=None, latStart=None, latEnd=None, country=None, type=None):
-#     result = list()
-#     # Define the query parameters
-#     query_params = {
-#         "start_time": startTime,
-#         "end_time": endTime,
-#         "latStart": latStart,
-#         "latEnd": latEnd,
-#         "longStart": longStart,
-#         "longEnd": longEnd,
-#         "country": country,
-#         "species": type
-#     }
-    
-#     if self.has_collection(collection_name):
-#         # Define the name of the collection to query
-#         collection = self.db.collection(collection_name)
-#         # Build the AQL query string
-#         aql_query = """
-#                     FOR doc IN @@collection
-#                     FILTER (!@start_time || doc.timestamp >= @start_time OR doc.latitude == null)
-#                     FILTER (!@end_time || doc.timestamp <= @end_time OR doc.latitude == null)
-#                     FILTER (!@latStart || !@latEnd || (doc.latitude >= @latStart AND doc.latitude <= @latEnd) OR doc.latitude == null)
-#                     FILTER (!@longStart || !@longEnd || (doc.longitude >= @longStart AND doc.longitude <= @longEnd) OR doc.longitude == null)                     
-#                     FILTER (!@country || doc.country == @country OR doc.country == null)
-#                     FILTER (!@species || doc.species == @species OR doc.species == null)
-#                     RETURN doc
-#                     """
-#         # Prepare the query for execution
-#         result = self.aql_execute(
-#             aql_query,
-#                 bind_vars={
-#                     "@collection": collection_name,
-#                     **query_params
-#                  }
-#         )
-
-#         print("Populated query: \n", aql_query.format(
-#         start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
-#         end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))"
-#             ))
-#         print("Query parameters: \n", query_params)
-#         print(result)
-
-#     return result
-    
-# def get_specified_documents(self, collection_names, bound="", startTime="", endTime="", longStart=None, longEnd=None, latStart=None, latEnd=None, country="", type=""):
-#     result = list()
-
-#     # Define the query parameters
-#     query_params = {
-#         "start_time": startTime,
-#         "end_time": endTime,
-#         "latStart": latStart,
-#         "latEnd": latEnd,
-#         "longStart": longStart,
-#         "longEnd": longEnd,
-#         "country": country,
-#         "species": type
-#     }
-
-#     # Create an empty list to hold the results from each collection
-#     all_results = []
-
-#     # Loop over each collection name in the list
-#     for collection_name in collection_names:
-#         if self.has_collection(collection_name):
-#             # Define the name of the collection to query
-#             collection = self.db.collection(collection_name)
-
-#             # Build the AQL query string
-#             aql_query = """
-#                         FOR doc IN @@collection
-#                         FILTER (!@start_time || doc.timestamp >= @start_time OR doc.latitude == null)
-#                         FILTER (!@end_time || doc.timestamp <= @end_time OR doc.latitude == null)
-#                         FILTER (!@latitude || doc.latitude >= @latStart OR doc.latitude == null)
-#                         FILTER (!@latitude || doc.latitude <= @latEnd OR doc.latitude == null)
-#                         FILTER (!@longitude || doc.longitude >= @longStart OR doc.longitude == null)
-#                         FILTER (!@longitude || doc.longitude <= @longEnd OR doc.longitude == null)                     
-#                         FILTER (!@country || doc.country == @country OR doc.country == null)
-#                         FILTER (!@species || doc.species == @species OR doc.species == null)
-#                         RETURN doc
-#                         """
-
-#             # Prepare the query for execution
-#             results = self.aql_execute(
-#                 aql_query,
-#                 bind_vars={
-#                     "@collection": collection_name,
-#                     **query_params
-#                 }
-#             )
-
-#             # Add the results to the list of all results
-#             all_results.extend(results)
-
-#             print("Populated query: \n", aql_query.format(
-#                 start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
-#                 end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))",
-#                 latitude_filter="(!@latitude || doc.latitude == @latitude)",
-#                 longitude_filter="(!@longitude || doc.longitude == @longitude)"
-#             ))
-#             print("Query parameters: \n", query_params)
-#             print(results)
-
-#     # Combine the results from all collections into a single list
-#     result = all_results
-
-#     return result
-
-# It can handle:
-
-# Find all sightings that occurred in December of 2019
-# Find all sightings that occurred between 01/01/1970 and 01/01/1999
-# Find all sightings that occurred in the Equatorial Zone
-# Find all sightings that occurred in the Equatorial Zone and are species Eagle
-# Find all RadioactiveWeasels regardless of time, country, place
-# Find all RadioactiveWeasels that also have satellite and trail cam video collections
-# Within a polygon (lat/lon) Ex: (lat=-10 to 10, lon=0,60)
-# That have trail cam audio files associated
-
-# However, it cannot handle the following cases:
-
-# Find all sightings of RadioactiveWeasels that have telescope and satellite data collections associated
-# Find all RadioactiveWeasels that have satellite data and attribute 1 <= 0.5
-# Find all files associated with a specific sighting
-# Find all files associated with a specific trail cam audio file (other audio files, sightings, anything linked to the sighting)
-# For a specific satellite collect, find all other collects that are within 10 seconds and 5 km, assuming the radius of the planet is the same as the earth. Do not use sighting node (search other indices)
-# Each of these cases requires additional query parameters and filtering conditions.
-
-# For the case "Of RadioactiveWeasels (regardless of time, country, place)": You can modify the query to include a filter for the species "RadioactiveWeasels" and remove the other filters (such as time, country, and place).
-# For the case "Within a polygon (lat/lon)": You can modify the query to include a filter for the latitude and longitude ranges specified in the polygon.
-# For the case "That have trail cam audio files associated": You can modify the query to include a filter for the presence of trail cam audio files in the associated files.
-# For the case "That have telescope and satellite data collections associated": You can modify the query to include a filter for the presence of telescope and satellite data collections in the associated files.
-# For the case "That have satellite data and attribute 1 <= 0.5": You can modify the query to include a filter for the attribute 1 value being less than or equal to 0.5 in the files that have satellite data.
-# For the case "For a specific satellite collect, find all other collects that are within 10 seconds and 5 km, assuming the radius of the planet is the same as the earth. Do not use sighting node (search other indices)": This case requires a more complex operation that involves searching for files based on time and distance from a specific satellite collect. It is not possible to modify the current query to handle this case.
-# def get_specified_documents(self, collection_names, bound="", startTime="", endTime="", longStart=None, longEnd=None, latStart=None, latEnd=None, country="", type="", include_edges=False):
-#     result = []
-
-#     # Define the query parameters
-#     query_params = {
-#         "start_time": startTime,
-#         "end_time": endTime,
-#         "latStart": latStart,
-#         "latEnd": latEnd,
-#         "longStart": longStart,
-#         "longEnd": longEnd,
-#         "country": country,
-#         "species": type,
-#         "include_edges": include_edges
-#     }
-
-#     if isinstance(collection_names, str):
-#         collection_names = [collection_names]
-
-#     if self.has_collection(collection_names):
-#         # Define the names of the collections to query
-#         collections = [self.db.collection(collection_name) for collection_name in collection_names]
-#         # Build the AQL query string
-#         aql_query = """
-#                     FOR doc IN @@collections
-#                     FILTER (!@start_time || doc.timestamp >= @start_time OR doc.latitude == null)
-#                     FILTER (!@end_time || doc.timestamp <= @end_time OR doc.latitude == null)
-#                     FILTER (!@latitude || doc.latitude >= @latStart OR doc.latitude == null)
-#                     FILTER (!@latitude || doc.latitude <= @latEnd OR doc.latitude == null)
-#                     FILTER (!@longitude || doc.longitude >= @longStart OR doc.longitude == null)
-#                     FILTER (!@longitude || doc.longitude <= @longEnd OR doc.longitude == null)                     
-#                     FILTER (!@country || doc.country == @country OR doc.country == null)
-#                     FILTER (!@species || doc.species == @species OR doc.species == null)
-#                     LET edges = @include_edges ? (
-#                         FOR e IN @@collections[*] FILTER e._from == doc._id || e._to == doc._id RETURN e
-#                     ) : []
-#                     RETURN {doc, edges}
-#                     """
-#         # Prepare the query for execution
-#         result = self.aql_execute(
-#             aql_query,
-#             bind_vars={
-#                 "@collections": collections,
-#                 **query_params
-#             }
-#         )
-
-#         print("Populated query: \n", aql_query.format(
-#             start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
-#             end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))",
-#             latitude_filter="(!@latitude || doc.latitude == @latitude)",
-#             longitude_filter="(!@longitude || doc.longitude == @longitude)"
-#         ))
-#         print("Query parameters: \n", query_params)
-#         print(result)
-
-#     return result
-
-    def get_specified_documents(self, collection_names, startTime="", endTime="", longStart="", longEnd="", latStart="", latEnd="", country="", type="", attribute1 = "", attribute2 = "",  include_edges=""):
+    def get_specified_documents(self, collection_names, startTime="", endTime="", longStart="", longEnd="", latStart="", latEnd="", country="", type="", attribute1Start = "", attribute1End = "", attribute2Start = "", attribute2End = "", include_edges=""):
         result = []
 
         # Define the query parameters
@@ -396,8 +162,10 @@ class ArangoDatabaseManager:
             "longEnd": longEnd,
             "country": country,
             "species": type,
-            "attribute1": attribute1,
-            "attribute2": attribute2,
+            "attribute1Start": attribute1Start,
+            "attribute1End": attribute1End,
+            "attribute2Start": attribute2Start,
+            "attribute2End": attribute2End,
             "include_edges": include_edges
         }
         # collections = collection_names
@@ -408,7 +176,7 @@ class ArangoDatabaseManager:
                 # Define the names of the collections to query
                 # collections = [self.db.collection(collection_name) for collection_name in collection_names]
                 # Build the AQL query string
-                #time must be YYYY-MM-DDTHH:mm:ss.sssZ?
+                #time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 aql_query = """
                             FOR doc IN @@collection
                                 FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -419,10 +187,10 @@ class ArangoDatabaseManager:
                                 FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 FILTER (!@country || doc.country == @country)
                                 FILTER (!@species || doc.species == @species)
-                                FILTER (!@attribute1 || doc.attribute1 >= @attribute1)
-                                FILTER (!@attribute1 || doc.attribute1 <= @attribute1)
-                                FILTER (!@attribute2|| doc.attribute2 >= @attribute2)
-                                FILTER (!@attribute2 || doc.attribute2 <= @attribute2)
+                                FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
                                 LET edges = @include_edges ? (
                                 FOR e IN @@collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
                                 RETURN {doc, edges}
@@ -436,14 +204,8 @@ class ArangoDatabaseManager:
                     }
                 )
 
-            # print("Populated query: \n", aql_query.format(
-            #     start_time_filter="(!@start_time || doc.timestamp >= DATE_TIMESTAMP(@start_time))",
-            #     end_time_filter="(!@end_time || doc.timestamp <= DATE_TIMESTAMP(@end_time))",
-            #     latitude_filter="(!@latitude || doc.latitude == @latitude)",
-            #     longitude_filter="(!@longitude || doc.longitude == @longitude)"
-            # ))
-            print("Query parameters: \n", query_params)
-            print(result)
+            # print("Query parameters: \n", query_params)
+            # print("results count: " + len(result))
 
         return result
 
@@ -498,3 +260,4 @@ def complex_query(self, database_name):
 
     # Return the result
     return result
+#UNCLASSIFIED

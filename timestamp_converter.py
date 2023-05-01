@@ -9,7 +9,7 @@ __status__ = "development"
 #UNCLASSIFIED
 #file@timestamp_converter.py
 #############################################################
-# purpose: converts timestamp field in json files to ISO8061 format
+# purpose: converts timestamp field in json files to ISO 8601 format
 #
 #
 #
@@ -82,3 +82,4 @@ for file_name in os.listdir(dir_path):
         print(f"Modified file saved to {output_path}")
 
 print("All JSON files in directory converted successfully.")
+#UNCLASSIFIED
