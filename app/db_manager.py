@@ -149,10 +149,17 @@ class ArangoDatabaseManager:
         return result
     
 
-    def get_specified_documents(self, collection_names, startTime="", endTime="", longStart="", longEnd="", latStart="", latEnd="", country="", type="", attribute1Start = "", attribute1End = "", attribute2Start = "", attribute2End = "", include_edges=""):
+    def get_specified_documents(self, collection_names, startTime="",
+                                endTime="", longStart="", longEnd="",
+                                latStart="", latEnd="", country="",
+                                type="", attribute1Start = "", 
+                                attribute1End = "", attribute2Start = "",
+                                attribute2End = "", include_edges="", exclude_edges=False):
+        """
+        """
         result = []
 
-        # Define the query parameters
+        # define the query parameters
         query_params = {
             "start_time": startTime,
             "end_time": endTime,
@@ -166,51 +173,197 @@ class ArangoDatabaseManager:
             "attribute1End": attribute1End,
             "attribute2Start": attribute2Start,
             "attribute2End": attribute2End,
-            "include_edges": include_edges
+            "include_edges": include_edges,
         }
         # collections = collection_names
         if isinstance(collection_names, str):
             collection_names = [collection_names]
         for collection in collection_names:
             if self.has_collection(collection):
-                # Define the names of the collections to query
-                # collections = [self.db.collection(collection_name) for collection_name in collection_names]
-                # Build the AQL query string
-                #time must be YYYY-MM-DDTHH:mm:ss.sssZ
-                aql_query = """
-                            FOR doc IN @@collection
-                                FILTER (!@start_time || doc.timestamp >= @start_time)
-                                FILTER (!@end_time || doc.timestamp <= @end_time)
-                                FILTER (!@latStart || doc.latitude >= @latStart)
-                                FILTER (!@latEnd || doc.latitude <= @latEnd)
-                                FILTER (!@longStart || doc.longitude >= @longStart)
-                                FILTER (!@longEnd || doc.longitude <= @longEnd)
-                                FILTER (!@country || doc.country == @country)
-                                FILTER (!@species || doc.species == @species)
-                                FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
-                                FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
-                                FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
-                                FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
-                                LET edges = @include_edges ? (
-                                FOR e IN @@collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
-                                RETURN {doc, edges}
-                            """
-                # Prepare the query for execution
+                # build the AQL query string
+                # time must be YYYY-MM-DDTHH:mm:ss.sssZ
+                # exclude documents with edges if exclude_edges is True
+                if exclude_edges:
+                    aql_query = """
+                                FOR doc IN @@collection
+                                    FILTER (!@start_time || doc.timestamp >= @start_time)
+                                    FILTER (!@end_time || doc.timestamp <= @end_time)
+                                    FILTER (!@latStart || doc.latitude >= @latStart)
+                                    FILTER (!@latEnd || doc.latitude <= @latEnd)
+                                    FILTER (!@longStart || doc.longitude >= @longStart)
+                                    FILTER (!@longEnd || doc.longitude <= @longEnd)
+                                    FILTER (!@country || doc.country == @country)
+                                    FILTER (!@species || doc.species == @species)
+                                    FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                    FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                    FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                    FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
+                                    FILTER LENGTH(FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) == 0
+                                    RETURN doc
+                                """
+                else:
+                    aql_query = """
+                                FOR doc IN @@collection
+                                    FILTER (!@start_time || doc.timestamp >= @start_time)
+                                    FILTER (!@end_time || doc.timestamp <= @end_time)
+                                    FILTER (!@latStart || doc.latitude >= @latStart)
+                                    FILTER (!@latEnd || doc.latitude <= @latEnd)
+                                    FILTER (!@longStart || doc.longitude >= @longStart)
+                                    FILTER (!@longEnd || doc.longitude <= @longEnd)
+                                    FILTER (!@country || doc.country == @country)
+                                    FILTER (!@species || doc.species == @species)
+                                    FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                    FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                    FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                    FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
+                                    LET edges = @include_edges ? (
+                                    FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
+                                    LET connectedDocs = @include_edges ? (
+                                    FOR e IN edges
+                                    LET startDoc = DOCUMENT(e._from)
+                                    LET endDoc = DOCUMENT(e._to)
+                                    RETURN startDoc._id == doc._id ? endDoc : startDoc
+                                    ) : []
+                                    RETURN {doc, edges, connectedDocs}
+                                """
+                # prepare the query for execution
                 result += self.aql_execute(
                     aql_query,
                     bind_vars={
                         "@collection": collection,
+                        "@edge_collection": "edge-" + collection,
                         **query_params
                     }
                 )
 
             # print("Query parameters: \n", query_params)
-            # print("results count: " + len(result))
+            print("results count: " + len(result))
 
         return result
+    
+    def get_specified_documents_pages(self, collection_names, page_size=10, page_number=1, startTime="",
+                                endTime="", longStart="", longEnd="",
+                                latStart="", latEnd="", country="",
+                                type="", attribute1Start = "", 
+                                attribute1End = "", attribute2Start = "",
+                                attribute2End = "", include_edges="", exclude_edges=False):
+        result = []
+        # calculate offset
+        offset = (page_number - 1) * page_size
+        count = page_size
 
+        # define the query parameters
+        query_params = {
+            "start_time": startTime,
+            "end_time": endTime,
+            "latStart": latStart,
+            "latEnd": latEnd,
+            "longStart": longStart,
+            "longEnd": longEnd,
+            "country": country,
+            "species": type,
+            "attribute1Start": attribute1Start,
+            "attribute1End": attribute1End,
+            "attribute2Start": attribute2Start,
+            "attribute2End": attribute2End,
+            "include_edges": include_edges,
+            "offset": offset,
+            "count": count
+        }
+        # collections = collection_names
+        if isinstance(collection_names, str):
+            collection_names = [collection_names]
+        for collection in collection_names:
+            if self.has_collection(collection):
+                # build the AQL query string
+                # time must be YYYY-MM-DDTHH:mm:ss.sssZ
+                # exclude documents with edges if exclude_edges is True
+                if exclude_edges:
+                    aql_query = """
+                                FOR doc IN @@collection
+                                    FILTER (!@start_time || doc.timestamp >= @start_time)
+                                    FILTER (!@end_time || doc.timestamp <= @end_time)
+                                    FILTER (!@latStart || doc.latitude >= @latStart)
+                                    FILTER (!@latEnd || doc.latitude <= @latEnd)
+                                    FILTER (!@longStart || doc.longitude >= @longStart)
+                                    FILTER (!@longEnd || doc.longitude <= @longEnd)
+                                    FILTER (!@country || doc.country == @country)
+                                    FILTER (!@species || doc.species == @species)
+                                    FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                    FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                    FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                    FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
+                                    FILTER LENGTH(FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) == 0
+                                    SORT doc.timestamp DESC
+                                    LIMIT @offset, @count
+                                    RETURN doc
+                                """
+                else:
+                    aql_query = """
+                                FOR doc IN @@collection
+                                    FILTER (!@start_time || doc.timestamp >= @start_time)
+                                    FILTER (!@end_time || doc.timestamp <= @end_time)
+                                    FILTER (!@latStart || doc.latitude >= @latStart)
+                                    FILTER (!@latEnd || doc.latitude <= @latEnd)
+                                    FILTER (!@longStart || doc.longitude >= @longStart)
+                                    FILTER (!@longEnd || doc.longitude <= @longEnd)
+                                    FILTER (!@country || doc.country == @country)
+                                    FILTER (!@species || doc.species == @species)
+                                    FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                    FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                    FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                    FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
+                                    SORT doc.timestamp DESC
+                                    LIMIT @offset, @count
+                                    LET edges = @include_edges ? (
+                                    FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
+                                    LET connectedDocs = @include_edges ? (
+                                    FOR e IN edges
+                                    LET startDoc = DOCUMENT(e._from)
+                                    LET endDoc = DOCUMENT(e._to)
+                                    RETURN startDoc._id == doc._id ? endDoc : startDoc
+                                    ) : []
+                                    RETURN {doc, edges, connectedDocs}
+                                """
+                # prepare the query for execution
+                result += self.aql_execute(
+                    aql_query,
+                    bind_vars={
+                        "@collection": collection,
+                        "@edge_collection": "edge-" + collection,
+                        **query_params
+                    }
+                )
 
-#maybe this will work?
+            # print("Query parameters: \n", query_params)
+            print("results count: " + len(result))
+    
+    def get_intersections(self):
+        # Specify the collection names
+        collection_names = ['sightings', 'audio', 'video']
+
+        # Create a list of document ids for each collection
+        doc_ids_list = []
+        for collection_name in collection_names:
+            collection = self.db.collection(collection_name)
+            doc_ids = [doc['_id'] for doc in collection.find({'_id': {'$exists': True}})]
+            doc_ids_list.append(doc_ids)
+
+        # Find the intersection of the document ids
+        common_doc_ids = set(doc_ids_list[0]).intersection(*doc_ids_list[1:])
+
+        # Retrieve the documents with the common ids
+        common_docs = []
+        for doc_id in common_doc_ids:
+            for collection_name in collection_names:
+                collection = self.db.collection(collection_name)
+                document = collection.get(doc_id)
+                if document is not None:
+                    common_docs.append(document)
+
+        return common_docs
+
+    #maybe this will work?
 # This query uses the ANY SHORTEST_PATH traversal to traverse 
 # the graph from the starting event_id vertex to all vertices
 #  that satisfy the specified conditions. The FILTER statements 

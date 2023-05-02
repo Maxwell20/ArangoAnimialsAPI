@@ -92,6 +92,37 @@ async def get_animals(  collections: str,
 
     return docs
 
+#TODO: Pass username and password through api
+@app.get("/get_animals_pages")
+async def get_animals_pages(  collections: str,
+                        page_size:int ,
+                        page_number:int,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        include_edges:bool | None = ""
+                        ):
+    collections = collections.split(",")
+    
+    docs = database_manager.get_specified_documents_pages(collections, page_size, page_number, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, include_edges)
+
+    return docs
+
+@app.get("/get_intersections")
+async def get_animals():
+    docs = database_manager.get_intersections()
+    return docs
+    
+
 def authenticate_to_db():
     global credentials, database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
