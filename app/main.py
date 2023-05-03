@@ -60,10 +60,9 @@ async def root():
 @app.get("/get_recent")
 async def get_recent(hours_ago:int,
                      collections:str):
-    docs = database_manager.get_recent_documents(collections, hours_ago = 0 )
+    docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
-#TODO: Pass username and password through api
 @app.get("/get_animals")
 async def get_animals(  collections: str,
                         startTime: str  | None = "",
@@ -78,18 +77,21 @@ async def get_animals(  collections: str,
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
-                        include_edges:bool | None = ""):
+                        includeEdges:bool | None = "",
+                        excludeEdges:bool | None = "",
+                        collecitonFilter:str | None = ""
+                        ):
     collections = collections.split(",")
+    collecitonFilter = collecitonFilter.split(",")
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, include_edges)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
 
     return docs
 
-#TODO: Pass username and password through api
 @app.get("/get_animals_pages")
 async def get_animals_pages(  collections: str,
-                        page_size:int ,
-                        page_number:int,
+                        pageSize:int ,
+                        pageNumber:int,
                         startTime: str  | None = "",
                         endTime: str | None = "",
                         longStart: float | None = "",
@@ -102,11 +104,14 @@ async def get_animals_pages(  collections: str,
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
-                        include_edges:bool | None = ""
+                        includeEdges:bool | None = "",
+                        excludeEdges:bool | None = "",
+                        collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
+    collecitonFilter = collecitonFilter.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, page_size, page_number, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, include_edges)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
 
     return docs
 

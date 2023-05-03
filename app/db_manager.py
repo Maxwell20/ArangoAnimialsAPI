@@ -49,22 +49,22 @@ class ArangoDatabaseManager:
         )
 
 
-    def create_collection(self, collection_name, collection_schema, edge=False):
+    def create_collection(self, collectionName, collection_schema, edge=False):
         """Create a collection with schema validation provided by
            the dictionary
         """
-        if not self.has_collection(collection_name):
-            collection = self.db.create_collection(collection_name, edge=edge)
+        if not self.has_collection(collectionName):
+            collection = self.db.create_collection(collectionName, edge=edge)
             collection.configure(schema=collection_schema)
             return collection
         else:
-            return self.db.collection(collection_name)
+            return self.db.collection(collectionName)
 
 
-    def has_collection(self, collection_name):
+    def has_collection(self, collectionName):
         """ Ask if the database has the given collection
         """
-        return self.db.has_collection(collection_name)
+        return self.db.has_collection(collectionName)
 
 
     def aql_execute(self, query_string, bind_vars={}):
@@ -78,17 +78,17 @@ class ArangoDatabaseManager:
         ]
 
 
-    def add_batch_to_collection(self, collection_name, batch):
+    def add_batch_to_collection(self, collectionName, batch):
         """Use import bulk to add a batch to the collection
            provided. If the collection does not exist,
            create it with no schema.
         """
         is_edge_batch = ("_from" in batch[0] and "_to" in batch[0])
-        if self.has_collection(collection_name):
-            collection = self.db.collection(collection_name)
+        if self.has_collection(collectionName):
+            collection = self.db.collection(collectionName)
         else:
             collection = self.create_collection(
-                collection_name,
+                collectionName,
                 collection_schema={},
                 edge=is_edge_batch
             ) 
@@ -100,7 +100,7 @@ class ArangoDatabaseManager:
             for element in batch:
                 fromStr = element["_from"]
                 toStr = element["_to"]
-                query = "FOR doc in " + collection_name + \
+                query = "FOR doc in " + collectionName + \
                         " FILTER doc._from == @fromStr \
                         && doc._to == @toStr \
                         RETURN doc._id"
@@ -115,24 +115,24 @@ class ArangoDatabaseManager:
             for element in batch:
                 collection.insert(element, overwrite=True)
 
-    def filter_connected_docs(self, aql_result, collections):
+    def filter_connected_docs(self, aqlResult, collections):
         """Function: filter_connected_docs
            Purpose: removes unwanted data from the connections results since we cant do
             that in the AQL query
         """
-        for item in aql_result:
+        for item in aqlResult:
             connected_docs = item.get("connectedDocs")
             if connected_docs is not None:
                 item["connectedDocs"] = [
                     doc for doc in connected_docs if doc is None or doc["_id"].split('/')[0] in collections
                 ]
-        return aql_result
+        return aqlResult
                                         
     
-    def get_recent_documents(self, collections, hours_ago):
+    def get_recent_documents(self, collections, hoursAgo):
         """Return a list of recent documents from the collection
         """
-        dt_start, dt_end = start_end_times_from_hoursago(hoursago=hours_ago)
+        dt_start, dt_end = start_end_times_from_hoursago(hoursago=hoursAgo)
         result = list()
         time_col = "start_time"
         if isinstance(collection_names, str):
@@ -156,9 +156,10 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", exclude_edges=False, connection_filter= None):
+                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
-           Purpose: returns the filtered result across a list of collections
+           Purpose: returns the filtered result across a list of collections 
+           Returns:
         """
         result = []
 
@@ -186,7 +187,7 @@ class ArangoDatabaseManager:
                 # build the AQL query string
                 # time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 # exclude documents with edges if exclude_edges is True
-                if exclude_edges:
+                if excludeEdges:
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -241,26 +242,26 @@ class ArangoDatabaseManager:
 
             # print("Query parameters: \n", query_params)
             #filters out unwanted connections
-            if connection_filter != None:
-                result = self.filter_connected_docs(result, connection_filter)
+            if connectionFilter != None:
+                result = self.filter_connected_docs(result, connectionFilter)
             print("results count: " + len(result))
 
         return result
     
-    def get_specified_documents_pages(self, collection_names, page_size=10, page_number=1, startTime="",
+    def get_specified_documents_pages(self, collectionNames, pageSize=10, pageNumber=1, startTime="",
                                 endTime="", longStart="", longEnd="",
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", exclude_edges=False,connection_filter= None):
+                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
            Purpose: returns the filtered result across a list of collections page by page for use with a 
            paged front end
         """
         result = []
         # calculate offset
-        offset = (page_number - 1) * page_size
-        count = page_size
+        offset = (pageNumber - 1) * pageSize
+        count = pageSize
 
         # define the query parameters
         query_params = {
@@ -281,14 +282,14 @@ class ArangoDatabaseManager:
             "count": count
         }
         # collections = collection_names
-        if isinstance(collection_names, str):
-            collection_names = [collection_names]
-        for collection in collection_names:
+        if isinstance(collectionNames, str):
+            collectionNames = [collectionNames]
+        for collection in collectionNames:
             if self.has_collection(collection):
                 # build the AQL query string
                 # time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 # exclude documents with edges if exclude_edges is True
-                if exclude_edges:
+                if excludeEdges:
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -346,9 +347,9 @@ class ArangoDatabaseManager:
                     }
                 )
             #filters out unwanted connections
-            if connection_filter != None:
-                result = self.filter_connected_docs(result, connection_filter)
+            if connectionFilter != None:
+                result = self.filter_connected_docs(result, connectionFilter)
             # print("Query parameters: \n", query_params)
-            print("results count: " + len(result))
+            # print("results count: " + len(result))
             return result
 #UNCLASSIFIED
