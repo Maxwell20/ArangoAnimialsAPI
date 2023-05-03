@@ -8,6 +8,7 @@ __email__ = "mtwente@colsa.com"
 __status__ = "development"
 
 #UNCLASSIFIED
+#file@db_manager.py
 """ Base classes and functionality for database management.
     This is similar to what we use but you don't have to use
     it.  
@@ -114,38 +115,39 @@ class ArangoDatabaseManager:
             for element in batch:
                 collection.insert(element, overwrite=True)
 
-                
-    def get_all_documents(self, collection_name, limit = 100):
-        """Return a list of all documents in the collection
+    def filter_connected_docs(self, aql_result, collections):
+        """Function: filter_connected_docs
+           Purpose: removes unwanted data from the connections results since we cant do
+            that in the AQL query
         """
-        if self.has_collection(collection_name):
-            print(collection_name)
-            collection = self.db.collection(collection_name)
-            test = []
-            for i in collection.all(skip = 0, limit = limit):
-                test.append(i)
-            return test
-        else:
-            print("no collection")
-            return list()
+        for item in aql_result:
+            connected_docs = item.get("connectedDocs")
+            if connected_docs is not None:
+                item["connectedDocs"] = [
+                    doc for doc in connected_docs if doc is None or doc["_id"].split('/')[0] in collections
+                ]
+        return aql_result
                                         
     
-    def get_recent_documents(self, collection_name, hours_ago):
+    def get_recent_documents(self, collections, hours_ago):
         """Return a list of recent documents from the collection
         """
         dt_start, dt_end = start_end_times_from_hoursago(hoursago=hours_ago)
         result = list()
         time_col = "start_time"
-        if self.has_collection(collection_name):
-            collection = self.db.collection(collection_name)
-            query = "LET dtprev = DATE_TIMESTAMP(@dt_start)" + \
-                    " FOR doc in " + collection_name + \
-                    " FILTER DATE_TIMESTAMP(doc.@time_col) >= dtprev" + \
-                    " RETURN doc"
-            result = self.aql_execute(
-                query,
-                bind_vars={"dt_start":dt_start, "time_col":time_col}
-            )
+        if isinstance(collection_names, str):
+            collection_names = [collections]
+        for collection_name in collection_names:
+            if self.has_collection(collection):
+                collection = self.db.collection(collection_name)
+                query = "LET dtprev = @dt_start" + \
+                        " FOR doc in " + collection_name + \
+                        " FILTER doc.@time_col >= dtprev" + \
+                        " RETURN doc"
+                result += self.aql_execute(
+                    query,
+                    bind_vars={"dt_start":dt_start, "time_col":time_col}
+                )
         return result
     
 
@@ -154,8 +156,9 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", exclude_edges=False):
-        """
+                                attribute2End = "", include_edges="", exclude_edges=False, connection_filter= None):
+        """Function: get_specified_documents
+           Purpose: returns the filtered result across a list of collections
         """
         result = []
 
@@ -237,6 +240,9 @@ class ArangoDatabaseManager:
                 )
 
             # print("Query parameters: \n", query_params)
+            #filters out unwanted connections
+            if connection_filter != None:
+                result = self.filter_connected_docs(result, connection_filter)
             print("results count: " + len(result))
 
         return result
@@ -246,7 +252,11 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", exclude_edges=False):
+                                attribute2End = "", include_edges="", exclude_edges=False,connection_filter= None):
+        """Function: get_specified_documents_pages
+           Purpose: returns the filtered result across a list of collections page by page for use with a 
+           paged front end
+        """
         result = []
         # calculate offset
         offset = (page_number - 1) * page_size
@@ -297,7 +307,8 @@ class ArangoDatabaseManager:
                                     SORT doc.timestamp DESC
                                     LIMIT @offset, @count
                                     RETURN doc
-                                """
+                                """            #filters out unwanted connections
+
                 else:
                     aql_query = """
                                 FOR doc IN @@collection
@@ -334,83 +345,10 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-
+            #filters out unwanted connections
+            if connection_filter != None:
+                result = self.filter_connected_docs(result, connection_filter)
             # print("Query parameters: \n", query_params)
             print("results count: " + len(result))
-    
-    def get_intersections(self):
-        # Specify the collection names
-        collection_names = ['sightings', 'audio', 'video']
-
-        # Create a list of document ids for each collection
-        doc_ids_list = []
-        for collection_name in collection_names:
-            collection = self.db.collection(collection_name)
-            doc_ids = [doc['_id'] for doc in collection.find({'_id': {'$exists': True}})]
-            doc_ids_list.append(doc_ids)
-
-        # Find the intersection of the document ids
-        common_doc_ids = set(doc_ids_list[0]).intersection(*doc_ids_list[1:])
-
-        # Retrieve the documents with the common ids
-        common_docs = []
-        for doc_id in common_doc_ids:
-            for collection_name in collection_names:
-                collection = self.db.collection(collection_name)
-                document = collection.get(doc_id)
-                if document is not None:
-                    common_docs.append(document)
-
-        return common_docs
-
-    #maybe this will work?
-# This query uses the ANY SHORTEST_PATH traversal to traverse 
-# the graph from the starting event_id vertex to all vertices
-#  that satisfy the specified conditions. The FILTER statements 
-# are used to filter the vertices based on their type, datetime, 
-# location, country, and edge connections. The RETURN DISTINCT v 
-# statement is used to return only the unique vertices that satisfy 
-# the conditions.
-# Note: that you will need to replace the placeholder values 
-# (event_id, collection_name, etc.) with the actual names and IDs
-#  of your ArangoDB collections and vertices. Also, you will need 
-# to provide the values for the query parameters
-#  (start_date, end_date, polygon, country_name, etc.) at runtime.
-def complex_query(self, database_name):
-
-    # # Query all events that have combinations of data source A, B and C
-    # query = '''
-    #     FOR v1, e1, p1 IN 1..1 OUTBOUND 'event_id' edge_collection_name
-    #     FOR v2, e2, p2 IN 1..1 OUTBOUND v1._id edge_collection_name
-    #     FOR v3, e3, p3 IN 1..1 OUTBOUND v2._id edge_collection_name
-    #     FILTER p1.edges[*].type ALL == "data source A" AND
-    #            p2.edges[*].type ALL == "data source B" AND
-    #            p3.edges[*].type ALL == "data source C"
-    #     RETURN DISTINCT
-    #     '''
-
-    # Construct the query
-    query = '''
-        FOR v, e, p IN ANY SHORTEST_PATH
-            'event_id'
-            TO
-            FILTER v.type IN ['X', 'Y', 'Z']
-            AND v.datetime >= start_date
-            AND v.datetime <= end_date
-            AND GEO_CONTAINS(polygon, [v.lon, v.lat])
-            AND v.country == 'country_name'
-            AND LENGTH(DOC(collection_name, v._id, "inbound_edges")) == 0
-            AND (
-                (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL != 'data source A')
-                OR (e.edges[*].type ALL == 'data source B' AND p.vertices[*].type ALL != 'data source B')
-                OR (e.edges[*].type ALL == 'data source A' AND p.vertices[*].type ALL == 'data source A')
-            )
-            RETURN DISTINCT v
-    '''
-
-    # Execute the query
-    result = self.db.aql.execute(query)
-
-    # Return the result
-    return result
+            return result
 #UNCLASSIFIED

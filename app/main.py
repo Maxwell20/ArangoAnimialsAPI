@@ -58,17 +58,10 @@ async def root():
 
 #example only remove later
 @app.get("/get_recent")
-async def get_recent(hours_ago:int | None = None):
-    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago = 0 )
+async def get_recent(hours_ago:int,
+                     collections:str):
+    docs = database_manager.get_recent_documents(collections, hours_ago = 0 )
     return docs
-
-
-
-#TODO: Pass username and password through api
-@app.get("/all_animals")
-async def all_animals():
-    all_docs = database_manager.get_all_documents('fauna_sightings')
-    return all_docs
 
 #TODO: Pass username and password through api
 @app.get("/get_animals")
