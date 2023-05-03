@@ -115,12 +115,6 @@ async def get_animals_pages(  collections: str,
 
     return docs
 
-@app.get("/get_intersections")
-async def get_animals():
-    docs = database_manager.get_intersections()
-    return docs
-    
-
 def authenticate_to_db():
     global credentials, database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
