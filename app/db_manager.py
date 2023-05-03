@@ -244,7 +244,7 @@ class ArangoDatabaseManager:
             #filters out unwanted connections
             if connectionFilter != None:
                 result = self.filter_connected_docs(result, connectionFilter)
-            print("results count: " + len(result))
+            # print("results count: " + len(result))
 
         return result
     
