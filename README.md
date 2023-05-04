@@ -23,7 +23,8 @@ you should then see your image listed
 ## to run and create the container run
     docker container run --publish 80:80 --name app-container app-image
 ## to run  and create the container and connect to arango on localhost
-    dodocker container run --publish 80:80 --network="host" --name app-container app-image
+    docker container run --publish 80:80 --network="host" --name app-container app-image
+
 verify the app is running on http://localhost:80/docs or http://172.17.0.1/docs
 ## to update the required dependancies for the docker image
 generate a new requirements.txt file 
@@ -36,3 +37,30 @@ to test a file name the file "test_\<file-to-test>.py" replace \<file-to-test> w
 then run
     pytest
 this will automatically run all the unit test.
+
+
+---------------------------------------------
+# update for ssl https 
+
+# Test certs set up.
+Please refer to ./certs/certinfo.txt for cert auth set up
+
+# Two way to build and run.
+# First is to build with docker. I would suggest using docker-compose below     
+    docker build -t app-image:latest
+    docker run --rm -d -p 443:443/tcp app-image:latest 
+
+# Second docker-compose
+# Build the image:
+docker-compose build
+# Once the image is built, run the container:
+docker-compose up -d
+# Or do all at once 
+docker-compose up --build -d --remove-orphans --no cache
+
+Once complete goto  
+https://www.localhostdomain.com/
+
+
+
+

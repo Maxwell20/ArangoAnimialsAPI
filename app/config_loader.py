@@ -49,7 +49,7 @@ from collections import namedtuple
 
 UvicornConfig = namedtuple(
     "UvicornConfig",
-    "host port ssl_certfile ssl_keyfile ssl_cert_reqs ssl_ca_certs"
+    "host port ssl_certfile ssl_keyfile ssl_cert_reqs ssl_ca_certs log_config"
 )
 
 class BaseUvicornConfigLoader(ABC):
@@ -85,6 +85,7 @@ class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
             ssl_keyfile = os.environ["UVICORN_ssl-keyfile"]
             ssl_cert_reqs = os.environ["UVICORN_ssl-cert-reqs"]
             ssl_ca_certs = os.environ["UVICORN_ssl-ca-certs"]
+            log_config = os.environ["UVICORN_log-config"]
 
             return UvicornConfig(
                 host = host,
@@ -93,6 +94,7 @@ class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
                 ssl_keyfile = ssl_keyfile,
                 ssl_cert_reqs = ssl_cert_reqs,
                 ssl_ca_certs = ssl_ca_certs,
+                log_config = log_config,
             )
         # Probably want to think about how we want to fail here
         except Exception as e:

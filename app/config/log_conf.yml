@@ -1,0 +1,46 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    "()": uvicorn.logging.DefaultFormatter
+    datefmt: "%Y-%m-%dT%H:%M:%S"
+    format: '[%(asctime)s.%(msecs)03dZ] %(name)s %(levelname)s %(message)s'
+  access:
+    "()": uvicorn.logging.AccessFormatter
+    datefmt: "%Y-%m-%dT%H:%M:%S"
+    format: '[%(asctime)s.%(msecs)03dZ] %(client_addr)s - "%(request_line)s" - %(status_code)s - %(name)s -- %(message)s'
+handlers:
+  access:
+    class : logging.handlers.RotatingFileHandler
+    formatter: access
+    filename: /run_log/access.log
+    maxBytes: 1024
+    backupCount: 3
+  uvicorn_log_file:
+    class : logging.handlers.RotatingFileHandler
+    formatter: default
+    filename: /run_log/uvicorn_default.log
+    maxBytes: 1024
+    backupCount: 3    
+  app_log_file:
+    class : logging.handlers.RotatingFileHandler
+    formatter: default
+    filename: /run_log/app_log_file.log
+    maxBytes: 1024
+    backupCount: 3      
+loggers:
+  uvicorn.error:
+    level: DEBUG
+    handlers:
+      - uvicorn_log_file
+    propagate: no
+  __main__:
+    level: DEBUG
+    handlers:
+      - app_log_file
+    propagate: no  
+  uvicorn.access:
+    level: INFO
+    handlers:
+      - access
+    propagate: no
