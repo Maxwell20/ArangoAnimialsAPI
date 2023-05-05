@@ -57,6 +57,17 @@
 #
 
 IMPORTANT
+
+# if windows add this to host file
+------------
+# localhost name resolution is handled within DNS itself.
+#	127.0.0.1       localhost
+#	::1             localhost
+127.0.0.1 localhostdomain.com
+127.0.0.1 localhost
+127.0.0.1 www.localhostdomain.com
+
+
 # In web browser go to setting search for cert manager
 # 1. Import client certs
 #   click import cert. point to client.p12. import as client cert.
