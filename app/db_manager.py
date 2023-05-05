@@ -150,7 +150,6 @@ class ArangoDatabaseManager:
                 )
         return result
     
-
     def get_specified_documents(self, collection_names, startTime="",
                                 endTime="", longStart="", longEnd="",
                                 latStart="", latEnd="", country="",
@@ -239,13 +238,8 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-
-            # print("Query parameters: \n", query_params)
-            #filters out unwanted connections
-            if connectionFilter != None:
+            if connectionFilter[0] != '':
                 result = self.filter_connected_docs(result, connectionFilter)
-            # print("results count: " + len(result))
-
         return result
     
     def get_specified_documents_pages(self, collectionNames, pageSize=10, pageNumber=1, startTime="",
@@ -346,10 +340,8 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-            #filters out unwanted connections
-            if connectionFilter != None:
+            # filters out unwanted connections
+            if connectionFilter[0] != '':
                 result = self.filter_connected_docs(result, connectionFilter)
-            # print("Query parameters: \n", query_params)
-            # print("results count: " + len(result))
             return result
 #UNCLASSIFIED
