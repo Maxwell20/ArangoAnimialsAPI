@@ -64,3 +64,8 @@ https://www.localhostdomain.com/
 
 
 
+
+IMPRTANT NOTE: you must install pytest. pytest isnt included in the virtual environment as it adds alot of packages and not needed on the deployed version. you need to uninstall pytest to build deployed version. 
+    pip install pytest
+or 
+    pip uninstall pytest

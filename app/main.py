@@ -44,9 +44,7 @@ Todo:
 """
 
 from fastapi import FastAPI
-import json
 from arango_auth import *
-# from .arango_auth import  ArangoCredentials, ArangoCredentialsEnvironmentVarLoader
 from db_manager import *
 import uvicorn 
 from config_loader import *
@@ -64,23 +62,73 @@ async def root():
 
 #example only remove later
 @app.get("/get_recent")
-async def get_recent(hours_ago:int | None = None):
-    docs = database_manager.get_recent_documents('fauna_sightings', hours_ago= 0 )
+async def get_recent(hours_ago:int,
+                     collections:str):
+    docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
-
-
-#TODO: Pass username and password through api
-@app.get("/all_animals")
-async def all_animals():
-    all_docs = database_manager.get_all_documents('fauna_sightings')
-    return all_docs
-
-#TODO: Pass username and password through api
 @app.get("/get_animals")
-async def get_animals(collection: str, startTime: str  | None = None, endTime: str | None = None, long: float | None = None, lat: float | None = None, country:str | None = None, type:str | None = None):
-    docs = database_manager.get_specified_documents('fauna_sightings', startTime, endTime, long, lat, country, type)
+async def get_animals(  collections: str,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        includeEdges:bool | None = "",
+                        excludeEdges:bool | None = "",
+                        collecitonFilter:str | None = ""
+                        ):
+    collections = collections.split(",")
+    collecitonFilter = collecitonFilter.split(",")
+    
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
+
     return docs
+
+@app.get("/get_animals_pages")
+async def get_animals_pages(  collections: str,
+                        pageSize:int ,
+                        pageNumber:int,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        includeEdges:bool | None = "",
+                        excludeEdges:bool | None = "",
+                        collecitonFilter:str | None = ""
+                        ):
+    collections = collections.split(",")
+    collecitonFilter = collecitonFilter.split(",")
+    
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
+
+    return docs
+
+def authenticate_to_db():
+    global credentials, database_manager
+    credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
+    config = UvicornConfigEnvironmentVarLoader().build_config()
+    database_manager = ArangoDatabaseManager(
+        database_name = credentials.database,
+        username = credentials.username,
+        password = credentials.password,
+        host = credentials.host
+    )
 
 if __name__ == '__main__':
     #start from main: python main.py
