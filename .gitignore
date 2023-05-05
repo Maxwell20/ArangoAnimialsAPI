@@ -4,3 +4,6 @@ run_log/access.log
 .gitignore
 run_log/uvicorn_default.log
 run_log/app_log_file.log
+run_log/app_log_file.log.1
+.gitignore
+run_log/uvicorn_default.log.1
