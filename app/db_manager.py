@@ -135,19 +135,17 @@ class ArangoDatabaseManager:
         dt_start, dt_end = start_end_times_from_hoursago(hoursago=hoursAgo)
         result = list()
         time_col = "start_time"
-        if isinstance(collection_names, str):
+        if isinstance(collections, str):
             collection_names = [collections]
         for collection_name in collection_names:
-            if self.has_collection(collection):
-                collection = self.db.collection(collection_name)
-                query = "LET dtprev = @dt_start" + \
-                        " FOR doc in " + collection_name + \
-                        " FILTER doc.@time_col >= dtprev" + \
-                        " RETURN doc"
-                result += self.aql_execute(
-                    query,
-                    bind_vars={"dt_start":dt_start, "time_col":time_col}
-                )
+            query = "LET dtprev = @dt_start" + \
+                    " FOR doc in @@collection" + \
+                    " FILTER doc.@time_col >= dtprev" + \
+                    " RETURN doc"
+            result += self.aql_execute(
+                query,
+                bind_vars={"collection":collection_name ,"dt_start":dt_start, "time_col":time_col}
+            )
         return result
     
     def get_specified_documents(self, collection_names, startTime="",
