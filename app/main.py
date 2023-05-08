@@ -49,7 +49,8 @@ from db_manager import *
 import uvicorn 
 from config_loader import *
 import logging
-
+import logging.config 
+import yaml
 
 app = FastAPI()
 
@@ -141,7 +142,11 @@ if __name__ == '__main__':
         password = credentials.password,
         host = credentials.host
     )
-   
+    
+    with open(config.log_config, 'r') as stream: 
+        logConfig = yaml.load(stream, Loader=yaml.FullLoader)
+    logging.config.dictConfig(logConfig)
+
     uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
     
     log = logging.getLogger(__name__)

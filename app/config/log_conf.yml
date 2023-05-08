@@ -1,10 +1,10 @@
 version: 1
-disable_existing_loggers: False
+disable_existing_loggers: true
 formatters:
   default:
     "()": uvicorn.logging.DefaultFormatter
     datefmt: "%Y-%m-%dT%H:%M:%S"
-    format: '[%(asctime)s.%(msecs)03dZ] %(name)s %(levelname)s %(message)s'
+    format: '[%(asctime)s.%(msecs)03dZ] Mode Name %(name)s %(levelname)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s'
   access:
     "()": uvicorn.logging.AccessFormatter
     datefmt: "%Y-%m-%dT%H:%M:%S"
@@ -15,32 +15,52 @@ handlers:
     class: logging.StreamHandler
     stream: ext://sys.stderr
   access:
+    class : logging.handlers.TimedRotatingFileHandler
+    formatter: access
+    filename: /run_log/access.log
+    backupCount: 18
+    when: H
+    interval: 4
+  uvicorn_log_file:
+    class : logging.handlers.TimedRotatingFileHandler
+    formatter: default
+    filename: /run_log/uvicorn_default.log
+    backupCount: 18
+    when: H   
+    interval: 4
+  app_log_file:
+    class : logging.handlers.TimedRotatingFileHandler
+    formatter: default
+    filename: /run_log/app_log_file.log
+    backupCount: 18     
+    when: H
+    interval: 4
+  access_size:
     class : logging.handlers.RotatingFileHandler
     formatter: access
     filename: /run_log/access.log
     maxBytes: 1024
     backupCount: 3
-  uvicorn_log_file:
+  uvicorn_log_file_size:
     class : logging.handlers.RotatingFileHandler
     formatter: default
     filename: /run_log/uvicorn_default.log
     maxBytes: 1024
     backupCount: 3    
-  app_log_file:
+  app_log_file_rotate_size:
     class : logging.handlers.RotatingFileHandler
     formatter: default
     filename: /run_log/app_log_file.log
     maxBytes: 1024
-    backupCount: 3      
+    backupCount: 3        
 loggers:
   uvicorn.error:
-    level: DEBUG
+    level: INFO
     handlers:
       - uvicorn_log_file
-      - default
     propagate: yes
-  __main__:
-    level: DEBUG
+  '':
+    level: INFO
     handlers:
       - app_log_file
       - default
@@ -49,5 +69,4 @@ loggers:
     level: INFO
     handlers:
       - access
-      - default
     propagate: yes
