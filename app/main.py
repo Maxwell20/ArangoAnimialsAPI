@@ -60,6 +60,10 @@ async def root():
     log.critical('call get http' )
     return {"message": "Hello World"}
 
+@app.get("/get_collection_names")
+async def get_collection_names():
+   return database_manager.get_collection_names()
+
 
 #example only remove later
 @app.get("/get_recent")

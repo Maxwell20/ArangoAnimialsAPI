@@ -48,6 +48,18 @@ class ArangoDatabaseManager:
             password = self.password            
         )
 
+    def get_collection_names(self):
+        collections = []
+        edgeCollections = []
+        for c in self.db.collections():
+            print(c)
+            if c['system'] != True:   
+                if c['type'] == "document":
+                    collections.append(c['name'])
+                if c['type'] == "edge":
+                    edgeCollections.append(c['name'])
+            
+        return collections, edgeCollections
 
     def create_collection(self, collectionName, collection_schema, edge=False):
         """Create a collection with schema validation provided by
