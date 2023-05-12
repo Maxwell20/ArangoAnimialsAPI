@@ -17,19 +17,19 @@ handlers:
   access:
     class : logging.handlers.RotatingFileHandler
     formatter: access
-    filename: /run_log/access.log
+    filename:  /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_acsess.log
     maxBytes: 1024
     backupCount: 3
   uvicorn_log_file:
     class : logging.handlers.RotatingFileHandler
     formatter: default
-    filename: /run_log/uvicorn_default.log
+    filename: /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_server.log
     maxBytes: 1024
     backupCount: 3    
   app_log_file:
     class : logging.handlers.RotatingFileHandler
     formatter: default
-    filename: /run_log/app_log_file.log
+    filename:  /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_app.log
     maxBytes: 1024
     backupCount: 3      
 loggers:

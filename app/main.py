@@ -51,6 +51,7 @@ from config_loader import *
 import logging
 import logging.config 
 import yaml
+from logger import *
 
 app = FastAPI()
 
@@ -134,6 +135,7 @@ def authenticate_to_db():
         password = credentials.password,
         host = credentials.host
     )
+
 
 if __name__ == '__main__':
     #start from main: python main.py
