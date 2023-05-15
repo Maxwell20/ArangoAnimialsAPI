@@ -11,7 +11,9 @@ run_log/app_log_file.log.2
 run_log/app_log_file.log.3
 run_log/uvicorn_default.log.2
 run_log/uvicorn_default.log.3
+run_log/.log
 run_log/*
 
 .vscode/launch.json
 *.__pycache__*
+run_log/uvicorn_acsess.log

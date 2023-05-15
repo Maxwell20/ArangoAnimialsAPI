@@ -88,13 +88,14 @@ async def get_animals(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
+                        edgeCollection:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
 
     return docs
 
@@ -115,13 +116,14 @@ async def get_animals_pages(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
+                        edgeCollection:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
 
     return docs
 

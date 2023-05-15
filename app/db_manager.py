@@ -165,7 +165,7 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
            Purpose: returns the filtered result across a list of collections 
            Returns:
@@ -258,7 +258,7 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
            Purpose: returns the filtered result across a list of collections page by page for use with a 
            paged front end
@@ -347,7 +347,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
-                        "@edge_collection": "edge-" + collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )
