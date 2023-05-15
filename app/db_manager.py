@@ -244,7 +244,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
-                        "@edge_collection": "edge-" + collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )
