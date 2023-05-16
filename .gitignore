@@ -16,4 +16,3 @@ run_log/*
 
 .vscode/launch.json
 *.__pycache__*
-run_log/uvicorn_acsess.log
