@@ -7,7 +7,7 @@
 # !!! To create your own user cert go to step 3.  
 
 
-#Create Certs
+# Create Certs
 # on windows you will need cygwin with openssl to create needed certs 
 # example of change to need dir /cygdrive/c is C:/  
 # cd /cygdrive/c/PROJECTS/RockProject/proxy/test-certs

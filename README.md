@@ -1,34 +1,79 @@
 # Getting started
 ## Activate virtual python environment 
-
     source env/bin/activate
 
-## to run the app from the main project directory : depricated - keeping for reference
-    uvicorn app.main:app --reload
-## to run the app from the main project directory : use this instead since we initialize objects in main and main starts uvicorn
-### note: the environment variables in the .env file may only work from vscode for development, in deployment they will come from the docker file
-    python main.py
+## Test certs set up.
+Refer to the certificate readme:
+    /certs/README_CERTIFICATES.md 
+for cert authorization set up.
 
-point your browser to http://127.0.0.1:8000 to verify the app is running
-you can navigate to /docs to view the api capabilities this page is generated automatically by FastAPI. This will be useful for development testing.
+## Two way to build and run.
+## First is to build with docker. use docker-compose:    
+    docker build -t app-image:latest
+    docker run --rm -d -p 443:443/tcp app-image:latest 
 
-## to build the docker image run
-    docker image build --tag app-image .
+## Second docker-compose
+## Build the image:
+    docker-compose build
+## Once the image is built, run the container:
+    docker-compose up -d
+## Or do all at once 
+    docker-compose up --build -d --remove-orphans --no cache
 
-then to verify the image is built run
-
+## to verify the image is built run
     docker image ls
 you should then see your image listed
 
-## to run and create the container run
-    docker container run --publish 80:80 --name app-container app-image
-## to run  and create the container and connect to arango on localhost
-    docker container run --publish 80:80 --network="host" --name app-container app-image
+## Once complete goto  
+https://www.localhostdomain.com/
 
-verify the app is running on http://localhost:80/docs or http://172.17.0.1/docs
+# Setup environment variables
+## it is recomended to use vscode along with a launch.json file
+## located under the <prj>/.vscode/launch.json directory
+## you will have to change the paths to your system spec.
+## example launch.json for vscode development:
+    {
+        // Use IntelliSense to learn about possible attributes.
+        // Hover to view descriptions of existing attributes.
+        // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "envFile": "/home/max/prj/colsa/ArangoAnimalsAPI/env/pyvenv.cfg",
+                "name": "Start",
+                "type": "python",
+                "request": "launch",
+                "program": "app/main.py",
+                "console": "integratedTerminal",
+                "justMyCode": true,
+                "env" : {
+                    "ARANGO_HOST": "http://localhost:1234/",
+                    "ARANGO_DATABASE": "SightingsDatabase",
+                    "ARANGO_USERNAME": "root",
+                    "ARANGO_PASSWORD": "adbpwd",
+                    "UVICORN_HOST": "0.0.0.0",
+                    "UVICORN_PORT": "443",
+                    "UVICORN_ssl-certfile":"/home/max/prj/colsa/ArangoAnimalsAPI/app/certs/server.cer",
+                    "UVICORN_ssl-keyfile":"/home/max/prj/colsa/ArangoAnimalsAPI/app/certs/server.key" ,
+                    "UVICORN_ssl-cert-reqs": "2",
+                    "UVICORN_ssl-ca-certs":"/home/max/prj/colsa/ArangoAnimalsAPI/app/certs/ca.cer",
+                    "UVICORN_log-config":"/home/max/prj/colsa/ArangoAnimalsAPI/app/config/log_conf_dev.yml"
+                },
+                "sudo": true
+            }
+        ]
+    }
+
+# Dependancies:
+## certificates
+this project is intended to run over ssl/tls using https secure protocol.
+certificates for testing are located under:
+    /certs
+refer to the certificate readme file for more information in the certificate folder.
+
+
 ## to update the required dependancies for the docker image
 generate a new requirements.txt file 
-
     pip freeze > requirements.txt
 Then rebuild the docker image and run the container again
 
@@ -37,33 +82,6 @@ to test a file name the file "test_\<file-to-test>.py" replace \<file-to-test> w
 then run
     pytest
 this will automatically run all the unit test.
-
-
----------------------------------------------
-# update for ssl https 
-
-# Test certs set up.
-Please refer to ./certs/certinfo.txt for cert auth set up
-
-# Two way to build and run.
-# First is to build with docker. I would suggest using docker-compose below     
-    docker build -t app-image:latest
-    docker run --rm -d -p 443:443/tcp app-image:latest 
-
-# Second docker-compose
-# Build the image:
-docker-compose build
-# Once the image is built, run the container:
-docker-compose up -d
-# Or do all at once 
-docker-compose up --build -d --remove-orphans --no cache
-
-Once complete goto  
-https://www.localhostdomain.com/
-
-
-
-
 
 IMPRTANT NOTE: you must install pytest. pytest isnt included in the virtual environment as it adds alot of packages and not needed on the deployed version. you need to uninstall pytest to build deployed version. 
     pip install pytest
