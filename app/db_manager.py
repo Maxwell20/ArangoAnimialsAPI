@@ -140,7 +140,49 @@ class ArangoDatabaseManager:
                 ]
         return aqlResult
                                         
-    
+    def get_document_by_key(self, key, includeEdges, edgeCollection):
+        """Function: get_specified_documents
+           Purpose: returns the filtered result across a list of collections 
+           Returns:
+        """
+        result = []
+
+        # define the query parameters
+        query_params = {
+            "key": key,
+            "include_edges": includeEdges,
+            "edge_collection": edgeCollection
+        }
+        collections = self.get_collection_names()
+        if isinstance(collection_names, str):
+            collection_names = collection_names[0]
+        for collection in collection_names:
+            if self.has_collection(collection):
+                # build the AQL query string
+                # time must be YYYY-MM-DDTHH:mm:ss.sssZ
+                aql_query = """
+                            FOR doc IN @@collection
+                                FILTER doc._key == @key
+                                FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
+                                    LET connectedDocs = @include_edges ? (
+                                    FOR e IN edges
+                                    LET startDoc = DOCUMENT(e._from)
+                                    LET endDoc = DOCUMENT(e._to)
+                                    RETURN startDoc._id == doc._id ? endDoc : startDoc
+                                    ) : []
+                                    RETURN {doc, edges, connectedDocs}
+                            """
+                # prepare the query for execution
+                result += self.aql_execute(
+                    aql_query,
+                    bind_vars={
+                        "@collection": collection,
+                        **query_params
+                    }
+                )
+
+        return result
+
     def get_recent_documents(self, collections, hoursAgo):
         """Return a list of recent documents from the collection
         """
@@ -188,7 +230,6 @@ class ArangoDatabaseManager:
             "attribute2End": attribute2End,
             "include_edges": include_edges,
         }
-        # collections = collection_names
         if isinstance(collection_names, str):
             collection_names = [collection_names]
         for collection in collection_names:

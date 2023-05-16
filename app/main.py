@@ -61,6 +61,13 @@ async def root():
     log.critical('call get http' )
     return {"message": "Hello World"}
 
+@app.get("/get_document_by_key")
+async def get_document_by_key(key:str,
+                              includeEdges:bool,
+                              edgeCollection:str | None = ""):
+    #gets a single document and its connection by key
+    docs = database_manager.get_document_by_key(key,includeEdges, edgeCollection)
+
 @app.get("/get_collection_names")
 async def get_collection_names():
    return database_manager.get_collection_names()
