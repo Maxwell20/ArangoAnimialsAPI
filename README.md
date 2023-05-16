@@ -24,8 +24,12 @@ for cert authorization set up.
     docker image ls
 you should then see your image listed
 
-## Once complete goto  
-https://www.localhostdomain.com/
+## Once complete go to: 
+    https://www.localhostdomain.com/
+or
+    https://www.localhostdomain.com/docs#
+for the swagger docs
+
 
 # Setup environment variables
 ## it is recomended to use vscode along with a launch.json file
