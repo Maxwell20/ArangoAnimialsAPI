@@ -9,7 +9,7 @@ __status__ = "development"
 #UNCLASSIFIED
 #file@test_main.py
 """
-    purpose: unit test for api 
+Unit test for api endpoints
 """
 
 from fastapi.testclient import TestClient

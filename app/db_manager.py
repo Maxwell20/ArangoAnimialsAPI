@@ -354,7 +354,6 @@ class ArangoDatabaseManager:
                                     LIMIT @offset, @count
                                     RETURN doc
                                 """            #filters out unwanted connections
-
                 else:
                     aql_query = """
                                 FOR doc IN @@collection
