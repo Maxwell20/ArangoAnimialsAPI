@@ -80,8 +80,8 @@ async def get_recent(hours_ago:int,
     docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
-@app.get("/get_animals")
-async def get_animals(  collections: str,
+@app.get("/get_documents")
+async def get_documents(  collections: str,
                         startTime: str  | None = "",
                         endTime: str | None = "",
                         longStart: float | None = "",
@@ -106,8 +106,8 @@ async def get_animals(  collections: str,
 
     return docs
 
-@app.get("/get_animals_pages")
-async def get_animals_pages(  collections: str,
+@app.get("/get_documents_paged")
+async def get_documents_paged(  collections: str,
                         pageSize:int ,
                         pageNumber:int,
                         startTime: str  | None = "",
