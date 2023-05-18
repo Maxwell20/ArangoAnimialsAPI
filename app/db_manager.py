@@ -163,6 +163,7 @@ class ArangoDatabaseManager:
                 aql_query = """
                             FOR doc IN @@collection
                                 FILTER doc._key == @key
+                                LET edges = @include_edges ? (
                                 FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
                                     LET connectedDocs = @include_edges ? (
                                     FOR e IN edges
