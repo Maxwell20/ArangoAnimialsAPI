@@ -144,19 +144,12 @@ def authenticate_to_db():
         password = credentials.password,
         host = credentials.host
     )
+    return config
 
 
 if __name__ == '__main__':
     #start from main: python main.py
-    global credentials, database_manager
-    credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    config = UvicornConfigEnvironmentVarLoader().build_config()
-    database_manager = ArangoDatabaseManager(
-        database_name = credentials.database,
-        username = credentials.username,
-        password = credentials.password,
-        host = credentials.host
-    )
+    config = authenticate_to_db()
     
     with open(config.log_config, 'r') as stream: 
         logConfig = yaml.load(stream, Loader=yaml.FullLoader)
