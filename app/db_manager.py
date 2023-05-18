@@ -9,9 +9,8 @@ __status__ = "development"
 
 #UNCLASSIFIED
 #file@db_manager.py
-""" Base classes and functionality for database management.
-    This is similar to what we use but you don't have to use
-    it.  
+""" 
+Base classes and functionality for database management.
 """
 from arango import ArangoClient
 from datetime_utils import *
@@ -38,9 +37,6 @@ class ArangoDatabaseManager:
             username = self.username,
             password = self.password
         )
-
-        # if not self.sys_db.has_database(self.database_name):
-        #     self.sys_db.create_database(self.database_name)
 
         self.db = self.client.db(
             self.database_name,
@@ -193,10 +189,12 @@ class ArangoDatabaseManager:
         if isinstance(collections, str):
             collection_names = [collections]
         for collection_name in collection_names:
-            query = "LET dtprev = @dt_start" + \
-                    " FOR doc in @@collection" + \
-                    " FILTER doc.@time_col >= dtprev" + \
-                    " RETURN doc"
+            query = """
+                    LET dtprev = @dt_start
+                    FOR doc in @@collection
+                        FILTER doc.timestamp >= dtprev
+                        RETURN doc
+                    """
             result += self.aql_execute(
                 query,
                 bind_vars={"collection":collection_name ,"dt_start":dt_start, "time_col":time_col}

@@ -135,7 +135,7 @@ async def get_documents_paged(  collections: str,
     return docs
 
 def authenticate_to_db():
-    global credentials, database_manager
+    global database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     config = UvicornConfigEnvironmentVarLoader().build_config()
     database_manager = ArangoDatabaseManager(
