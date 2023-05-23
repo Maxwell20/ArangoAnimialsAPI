@@ -19,9 +19,19 @@ from config_loader import *
 import logging
 import logging.config 
 import yaml
-from logger import *
+from fastapi.middleware.cors import CORSMiddleware
+from logger import Logger
 
 app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with your frontend's domain(s) for production
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -125,10 +135,15 @@ if __name__ == '__main__':
 
     uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
     
+    print("this is a test")
+ 
+    log = logging.getLogger(__name__)
+    log.critical('call get http' )
     log = logging.getLogger(__name__)
     log.warning('This is a warning message from logger')
     log.error('This is an error message from logger')
     log.critical('This is a critical message from logger')
+    log.info("testinfo")
       
     log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
     log.debug('Server https cert %s' , config.ssl_keyfile)
