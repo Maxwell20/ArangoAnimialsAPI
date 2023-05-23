@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  arangodb_service:
+    container_name: app-image
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: app-image:latest
+    hostname: localhostdomain.com
+    volumes:
+      - ./app/:/code
+      - ./app/config/log_conf.yml:/code/config/log_conf.yml
+      - ./run_log/:/run_log
+    ports:
+      - '80:80'  
+      - '443:443'
+    command: python ./main.py

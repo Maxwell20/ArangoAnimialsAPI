@@ -9,9 +9,8 @@ __status__ = "development"
 
 #UNCLASSIFIED
 #file@db_manager.py
-""" Base classes and functionality for database management.
-    This is similar to what we use but you don't have to use
-    it.  
+""" 
+Base classes and functionality for database management.
 """
 from arango import ArangoClient
 from datetime_utils import *
@@ -39,15 +38,24 @@ class ArangoDatabaseManager:
             password = self.password
         )
 
-        # if not self.sys_db.has_database(self.database_name):
-        #     self.sys_db.create_database(self.database_name)
-
         self.db = self.client.db(
             self.database_name,
             username = self.username,
             password = self.password            
         )
 
+    def get_collection_names(self):
+        collections = []
+        edgeCollections = []
+        for c in self.db.collections():
+            print(c)
+            if c['system'] != True:   
+                if c['type'] == "document":
+                    collections.append(c['name'])
+                if c['type'] == "edge":
+                    edgeCollections.append(c['name'])
+            
+        return collections, edgeCollections
 
     def create_collection(self, collectionName, collection_schema, edge=False):
         """Create a collection with schema validation provided by
@@ -128,26 +136,69 @@ class ArangoDatabaseManager:
                 ]
         return aqlResult
                                         
-    
+    def get_document_by_key(self, key, includeEdges, edgeCollection):
+        """Function: get_specified_documents
+           Purpose: returns the filtered result across a list of collections 
+           Returns:
+        """
+        result = []
+
+        # define the query parameters
+        query_params = {
+            "key": key,
+            "include_edges": includeEdges,
+            "edge_collection": edgeCollection
+        }
+        collections = self.get_collection_names()
+        if isinstance(collection_names, str):
+            collection_names = collection_names[0]
+        for collection in collection_names:
+            if self.has_collection(collection):
+                # build the AQL query string
+                # time must be YYYY-MM-DDTHH:mm:ss.sssZ
+                aql_query = """
+                            FOR doc IN @@collection
+                                FILTER doc._key == @key
+                                LET edges = @include_edges ? (
+                                FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
+                                    LET connectedDocs = @include_edges ? (
+                                    FOR e IN edges
+                                    LET startDoc = DOCUMENT(e._from)
+                                    LET endDoc = DOCUMENT(e._to)
+                                    RETURN startDoc._id == doc._id ? endDoc : startDoc
+                                    ) : []
+                                    RETURN {doc, edges, connectedDocs}
+                            """
+                # prepare the query for execution
+                result += self.aql_execute(
+                    aql_query,
+                    bind_vars={
+                        "@collection": collection,
+                        **query_params
+                    }
+                )
+
+        return result
+
     def get_recent_documents(self, collections, hoursAgo):
         """Return a list of recent documents from the collection
         """
         dt_start, dt_end = start_end_times_from_hoursago(hoursago=hoursAgo)
         result = list()
         time_col = "start_time"
-        if isinstance(collection_names, str):
+        if isinstance(collections, str):
             collection_names = [collections]
         for collection_name in collection_names:
-            if self.has_collection(collection):
-                collection = self.db.collection(collection_name)
-                query = "LET dtprev = @dt_start" + \
-                        " FOR doc in " + collection_name + \
-                        " FILTER doc.@time_col >= dtprev" + \
-                        " RETURN doc"
-                result += self.aql_execute(
-                    query,
-                    bind_vars={"dt_start":dt_start, "time_col":time_col}
-                )
+            query = """
+                    LET dtprev = @dt_start
+                    FOR doc in @@collection
+                        FILTER doc.timestamp >= dtprev
+                        RETURN doc
+                    """
+            result += self.aql_execute(
+                query,
+                bind_vars={"collection":collection_name ,"dt_start":dt_start, "time_col":time_col}
+            )
         return result
     
     def get_specified_documents(self, collection_names, startTime="",
@@ -155,7 +206,7 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
            Purpose: returns the filtered result across a list of collections 
            Returns:
@@ -178,7 +229,6 @@ class ArangoDatabaseManager:
             "attribute2End": attribute2End,
             "include_edges": include_edges,
         }
-        # collections = collection_names
         if isinstance(collection_names, str):
             collection_names = [collection_names]
         for collection in collection_names:
@@ -234,7 +284,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
-                        "@edge_collection": "edge-" + collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )
@@ -248,7 +298,7 @@ class ArangoDatabaseManager:
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
            Purpose: returns the filtered result across a list of collections page by page for use with a 
            paged front end
@@ -304,7 +354,6 @@ class ArangoDatabaseManager:
                                     LIMIT @offset, @count
                                     RETURN doc
                                 """            #filters out unwanted connections
-
                 else:
                     aql_query = """
                                 FOR doc IN @@collection
@@ -337,7 +386,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
-                        "@edge_collection": "edge-" + collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )

@@ -1,0 +1,53 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    "()": uvicorn.logging.DefaultFormatter
+    datefmt: "%Y-%m-%dT%H:%M:%S"
+    format: '[%(asctime)s.%(msecs)03dZ] %(name)s %(levelname)s %(message)s'
+  access:
+    "()": uvicorn.logging.AccessFormatter
+    datefmt: "%Y-%m-%dT%H:%M:%S"
+    format: '[%(asctime)s.%(msecs)03dZ] %(client_addr)s - "%(request_line)s" - %(status_code)s - %(name)s -- %(message)s'
+handlers:
+  default:
+    formatter: default
+    class: logging.StreamHandler
+    stream: ext://sys.stderr
+  access:
+    class : logging.handlers.RotatingFileHandler
+    formatter: access
+    filename:  /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_acsess.log
+    maxBytes: 1024
+    backupCount: 3
+  uvicorn_log_file:
+    class : logging.handlers.RotatingFileHandler
+    formatter: default
+    filename: /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_server.log
+    maxBytes: 1024
+    backupCount: 3    
+  app_log_file:
+    class : logging.handlers.RotatingFileHandler
+    formatter: default
+    filename:  /home/max/prj/colsa/ArangoAnimalsAPI/run_log/uvicorn_app.log
+    maxBytes: 1024
+    backupCount: 3      
+loggers:
+  uvicorn.error:
+    level: DEBUG
+    handlers:
+      - uvicorn_log_file
+      - default
+    propagate: yes
+  "":
+    level: DEBUG
+    handlers:
+      - app_log_file
+      - default
+    propagate: yes  
+  uvicorn.access:
+    level: INFO
+    handlers:
+      - access
+      - default
+    propagate: yes
