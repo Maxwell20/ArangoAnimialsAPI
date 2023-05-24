@@ -8,41 +8,9 @@ __email__ = "mtwente@colsa.com"
 __status__ = "development"
 #UNCLASSIFIED
 #file@main.py
-
-"""Example Google style docstrings.
-
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
-
-Example:
-    Examples can be given using either the ``Example`` or ``Examples``
-    sections. Sections support any reStructuredText formatting, including
-    literal blocks::
-
-        $ python example_google.py
-
-Section breaks are created by resuming unindented text. Section breaks
-are also implicitly created anytime a new section starts.
-
-Attributes:
-    module_level_variable1 (int): Module level variables may be documented in
-        either the ``Attributes`` section of the module docstring, or in an
-        inline docstring immediately following the variable.
-
-        Either form is acceptable, but the two should not be mixed. Choose
-        one convention to document module level variables and be consistent
-        with it.
-
-Todo:
-    * For module TODOs
-    * You have to also use ``sphinx.ext.todo`` extension
-
-.. _Google Python Style Guide:
-   http://google.github.io/styleguide/pyguide.html
-
 """
-
+API Endpoints, support functions and main entry point for the API.
+"""
 from fastapi import FastAPI
 from arango_auth import *
 from db_manager import *
@@ -51,9 +19,19 @@ from config_loader import *
 import logging
 import logging.config 
 import yaml
+from fastapi.middleware.cors import CORSMiddleware
 import time
 
 app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with your frontend's domain(s) for production
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -80,8 +58,8 @@ async def get_recent(hours_ago:int,
     docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
-@app.get("/get_animals")
-async def get_animals(  collections: str,
+@app.get("/get_documents")
+async def get_documents(  collections: str,
                         startTime: str  | None = "",
                         endTime: str | None = "",
                         longStart: float | None = "",
@@ -106,8 +84,8 @@ async def get_animals(  collections: str,
 
     return docs
 
-@app.get("/get_animals_pages")
-async def get_animals_pages(  collections: str,
+@app.get("/get_documents_paged")
+async def get_documents_paged(  collections: str,
                         pageSize:int ,
                         pageNumber:int,
                         startTime: str  | None = "",
@@ -135,7 +113,7 @@ async def get_animals_pages(  collections: str,
     return docs
 
 def authenticate_to_db():
-    global credentials, database_manager
+    global database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     config = UvicornConfigEnvironmentVarLoader().build_config()
     database_manager = ArangoDatabaseManager(
@@ -144,23 +122,17 @@ def authenticate_to_db():
         password = credentials.password,
         host = credentials.host
     )
+    return config
 
 
 if __name__ == '__main__':
     #start from main: python main.py
-    global credentials, database_manager
-    credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    config = UvicornConfigEnvironmentVarLoader().build_config()
-    database_manager = ArangoDatabaseManager(
-        database_name = credentials.database,
-        username = credentials.username,
-        password = credentials.password,
-        host = credentials.host
-    )
+    config = authenticate_to_db()
     
     with open(config.log_config, 'r') as stream: 
         logConfig = yaml.load(stream, Loader=yaml.FullLoader)
     logging.config.dictConfig(logConfig)
+
 
     log = logging.getLogger(__name__)
     

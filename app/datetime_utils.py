@@ -6,9 +6,11 @@ __version__ = ""
 __maintainer__ = ""
 __email__ = ""
 __status__ = "development"
-"""Datetime utilities
-"""
 #UNCLASSIFIED
+#file@datetime_utils.py
+"""
+Datetime utilities
+"""
 import datetime
 
 standard_datetime_format = "%Y-%m-%d %H:%M:%S"
