@@ -51,7 +51,7 @@ from config_loader import *
 import logging
 import logging.config 
 import yaml
-from logger import *
+import time
 
 app = FastAPI()
 
@@ -162,16 +162,19 @@ if __name__ == '__main__':
         logConfig = yaml.load(stream, Loader=yaml.FullLoader)
     logging.config.dictConfig(logConfig)
 
-    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
-    
     log = logging.getLogger(__name__)
-    log.warning('This is a warning message from logger')
-    log.error('This is an error message from logger')
-    log.critical('This is a critical message from logger')
+    
+    time.sleep(5)
+    log.warning('This is a warning message from logger %s' , "hi")
+    log.error('This is an error message from logger %s' , "hi")
+    log.critical('This is a critical message from logger %s' , "hi")
       
     log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
     log.debug('Server https cert %s' , config.ssl_keyfile)
     log.debug('Server https private key %s' , config.ssl_certfile)
     log.debug('logging config file %s' , config.log_config)
+    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
+    
+
 #UNCLASSIFIED
  
