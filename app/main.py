@@ -58,6 +58,7 @@ async def get_recent(hours_ago:int,
     docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
+#index of collections and corresponding edge collections must match
 @app.get("/get_documents")
 async def get_documents(  collections: str,
                         startTime: str  | None = "",
@@ -73,17 +74,20 @@ async def get_documents(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
-                        edgeCollection:str | None = "",
+                        edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
+    edgeCollections = edgeCollections.split(",")
+
     
     docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
 
     return docs
 
+#index of collections and corresponding edge collections must match
 @app.get("/get_documents_paged")
 async def get_documents_paged(  collections: str,
                         pageSize:int ,
@@ -101,12 +105,13 @@ async def get_documents_paged(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
-                        edgeCollection:str | None = "",
+                        edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
+    edgeCollections = edgeCollections.split(",")
     
     docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
 
