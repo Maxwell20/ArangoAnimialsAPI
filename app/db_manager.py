@@ -14,6 +14,7 @@ Base classes and functionality for database management.
 """
 from arango import ArangoClient
 from datetime_utils import *
+from datetime import datetime
 
 class ArangoDatabaseManager:
     """Arango database management object
@@ -294,6 +295,10 @@ class ArangoDatabaseManager:
             result = self.filter_connected_docs(result, connectionFilter)
         return result
     
+    def sort_documents(self, documents, num_documents):
+        sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['doc']['timestamp']), reverse=True)
+        return sorted_documents[:num_documents]
+    
     def get_specified_documents_pages(self, collections, pageSize=10, pageNumber=1, startTime="",
                                 endTime="", longStart="", longEnd="",
                                 latStart="", latEnd="", country="",
@@ -394,7 +399,9 @@ class ArangoDatabaseManager:
                     }
                 )
             # filters out unwanted connections
-            if connectionFilter[0] != '':
-                result = self.filter_connected_docs(result, connectionFilter)
-            return result
+        if connectionFilter[0] != '':
+            result = self.filter_connected_docs(result, connectionFilter)
+        #remove extra results to fit page size
+        result = self.sort_documents(result, pageSize)
+        return result
 #UNCLASSIFIED
