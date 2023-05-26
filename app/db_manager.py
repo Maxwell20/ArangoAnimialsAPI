@@ -290,9 +290,8 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-            if connectionFilter[0] != '':
-                result = self.filter_connected_docs(result, connectionFilter)
-
+        if connectionFilter[0] != '':
+            result = self.filter_connected_docs(result, connectionFilter)
         return result
     
     def get_specified_documents_pages(self, collections, pageSize=10, pageNumber=1, startTime="",

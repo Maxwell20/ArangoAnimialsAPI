@@ -141,10 +141,10 @@ if __name__ == '__main__':
 
     log = logging.getLogger(__name__)
     
-    time.sleep(5)
-    log.warning('This is a warning message from logger %s' , "hi")
-    log.error('This is an error message from logger %s' , "hi")
-    log.critical('This is a critical message from logger %s' , "hi")
+    # time.sleep(5)
+    # log.warning('This is a warning message from logger %s' , "hi")
+    # log.error('This is an error message from logger %s' , "hi")
+    # log.critical('This is a critical message from logger %s' , "hi")
       
     log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
     log.debug('Server https cert %s' , config.ssl_keyfile)
