@@ -83,7 +83,7 @@ async def get_documents(  collections: str,
     edgeCollections = edgeCollections.split(",")
 
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
 
     return docs
 
@@ -113,7 +113,7 @@ async def get_documents_paged(  collections: str,
     collecitonFilter = collecitonFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
 
     return docs
 
