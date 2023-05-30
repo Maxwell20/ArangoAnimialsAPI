@@ -147,12 +147,10 @@ class ArangoDatabaseManager:
         # define the query parameters
         query_params = {
             "key": key,
-            "include_edges": includeEdges,
-            "edge_collection": edgeCollection
+            "include_edges": includeEdges
         }
         collections = self.get_collection_names()
-        if isinstance(collection_names, str):
-            collection_names = collection_names[0]
+        collection_names = collections[0]
         for collection in collection_names:
             if self.has_collection(collection):
                 # build the AQL query string
@@ -175,6 +173,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )
