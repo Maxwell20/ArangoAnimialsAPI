@@ -20,7 +20,7 @@ import logging
 import logging.config 
 import yaml
 from fastapi.middleware.cors import CORSMiddleware
-from logger import Logger
+import time
 
 app = FastAPI()
 
@@ -45,6 +45,7 @@ async def get_document_by_key(key:str,
                               edgeCollection:str | None = ""):
     #gets a single document and its connection by key
     docs = database_manager.get_document_by_key(key,includeEdges, edgeCollection)
+    return docs
 
 @app.get("/get_collection_names")
 async def get_collection_names():
@@ -58,6 +59,7 @@ async def get_recent(hours_ago:int,
     docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
+#index of collections and corresponding edge collections must match
 @app.get("/get_documents")
 async def get_documents(  collections: str,
                         startTime: str  | None = "",
@@ -73,17 +75,20 @@ async def get_documents(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
-                        edgeCollection:str | None = "",
+                        edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
+    edgeCollections = edgeCollections.split(",")
+
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
 
     return docs
 
+#index of collections and corresponding edge collections must match
 @app.get("/get_documents_paged")
 async def get_documents_paged(  collections: str,
                         pageSize:int ,
@@ -101,14 +106,15 @@ async def get_documents_paged(  collections: str,
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
                         includeEdges:bool | None = "",
-                        edgeCollection:str | None = "",
+                        edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collecitonFilter:str | None = ""
                         ):
     collections = collections.split(",")
     collecitonFilter = collecitonFilter.split(",")
+    edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollection, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
 
     return docs
 
@@ -133,21 +139,20 @@ if __name__ == '__main__':
         logConfig = yaml.load(stream, Loader=yaml.FullLoader)
     logging.config.dictConfig(logConfig)
 
-    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
+
+    log = logging.getLogger(__name__)
     
-    print("this is a test")
- 
-    log = logging.getLogger(__name__)
-    log.critical('call get http' )
-    log = logging.getLogger(__name__)
-    log.warning('This is a warning message from logger')
-    log.error('This is an error message from logger')
-    log.critical('This is a critical message from logger')
-    log.info("testinfo")
+    # time.sleep(5)
+    # log.warning('This is a warning message from logger %s' , "hi")
+    # log.error('This is an error message from logger %s' , "hi")
+    # log.critical('This is a critical message from logger %s' , "hi")
       
     log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
     log.debug('Server https cert %s' , config.ssl_keyfile)
     log.debug('Server https private key %s' , config.ssl_certfile)
     log.debug('logging config file %s' , config.log_config)
+    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
+    
+
 #UNCLASSIFIED
  

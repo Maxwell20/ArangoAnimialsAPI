@@ -14,6 +14,7 @@ Base classes and functionality for database management.
 """
 from arango import ArangoClient
 from datetime_utils import *
+from datetime import datetime
 
 class ArangoDatabaseManager:
     """Arango database management object
@@ -146,12 +147,10 @@ class ArangoDatabaseManager:
         # define the query parameters
         query_params = {
             "key": key,
-            "include_edges": includeEdges,
-            "edge_collection": edgeCollection
+            "include_edges": includeEdges
         }
         collections = self.get_collection_names()
-        if isinstance(collection_names, str):
-            collection_names = collection_names[0]
+        collection_names = collections[0]
         for collection in collection_names:
             if self.has_collection(collection):
                 # build the AQL query string
@@ -174,6 +173,7 @@ class ArangoDatabaseManager:
                     aql_query,
                     bind_vars={
                         "@collection": collection,
+                        "@edge_collection": edgeCollection,
                         **query_params
                     }
                 )
@@ -201,12 +201,12 @@ class ArangoDatabaseManager:
             )
         return result
     
-    def get_specified_documents(self, collection_names, startTime="",
+    def get_specified_documents(self, collections, startTime="",
                                 endTime="", longStart="", longEnd="",
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
            Purpose: returns the filtered result across a list of collections 
            Returns:
@@ -229,13 +229,15 @@ class ArangoDatabaseManager:
             "attribute2End": attribute2End,
             "include_edges": include_edges,
         }
-        if isinstance(collection_names, str):
-            collection_names = [collection_names]
-        for collection in collection_names:
-            if self.has_collection(collection):
+        if isinstance(collections, str):
+            collections = [collections]
+        if isinstance(edgeCollections, str):
+            edgeCollections = [edgeCollections]
+        for collection, edgeCollection in zip(collections, edgeCollections):         
                 # build the AQL query string
                 # time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 # exclude documents with edges if exclude_edges is True
+                # index of collections and corresponding edge collections must match
                 if excludeEdges:
                     aql_query = """
                                 FOR doc IN @@collection
@@ -288,17 +290,20 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-            if connectionFilter[0] != '':
-                result = self.filter_connected_docs(result, connectionFilter)
-
+        if connectionFilter[0] != '':
+            result = self.filter_connected_docs(result, connectionFilter)
         return result
     
-    def get_specified_documents_pages(self, collectionNames, pageSize=10, pageNumber=1, startTime="",
+    def sort_documents(self, documents, num_documents):
+        sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['doc']['timestamp']), reverse=True)
+        return sorted_documents[:num_documents]
+    
+    def get_specified_documents_pages(self, collections, pageSize=10, pageNumber=1, startTime="",
                                 endTime="", longStart="", longEnd="",
                                 latStart="", latEnd="", country="",
                                 type="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
-                                attribute2End = "", include_edges="", edgeCollection = "", excludeEdges=False, connectionFilter= None):
+                                attribute2End = "", include_edges="", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
            Purpose: returns the filtered result across a list of collections page by page for use with a 
            paged front end
@@ -326,14 +331,16 @@ class ArangoDatabaseManager:
             "offset": offset,
             "count": count
         }
-        # collections = collection_names
-        if isinstance(collectionNames, str):
-            collectionNames = [collectionNames]
-        for collection in collectionNames:
+        if isinstance(collections, str):
+            collections = [collections]
+        if isinstance(edgeCollections, str):
+            edgeCollections = [edgeCollections]
+        for collection, edgeCollection in zip(collections, edgeCollections):
             if self.has_collection(collection):
                 # build the AQL query string
                 # time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 # exclude documents with edges if exclude_edges is True
+                # index of collections and corresponding edge collections must match
                 if excludeEdges:
                     aql_query = """
                                 FOR doc IN @@collection
@@ -391,7 +398,9 @@ class ArangoDatabaseManager:
                     }
                 )
             # filters out unwanted connections
-            if connectionFilter[0] != '':
-                result = self.filter_connected_docs(result, connectionFilter)
-            return result
+        if connectionFilter[0] != '':
+            result = self.filter_connected_docs(result, connectionFilter)
+        #remove extra results to fit page size
+        result = self.sort_documents(result, pageSize)
+        return result
 #UNCLASSIFIED
