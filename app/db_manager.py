@@ -137,48 +137,69 @@ class ArangoDatabaseManager:
                 ]
         return aqlResult
                                         
-    def get_document_by_key(self, key, includeEdges, edgeCollection):
+    def get_document_by_key(self, key, includeEdges):
         """Function: get_specified_documents
            Purpose: returns the filtered result across a list of collections 
            Returns:
         """
         result = []
+        connectedDocs = []
 
-        # define the query parameters
-        query_params = {
-            "key": key,
-            "include_edges": includeEdges
-        }
         collections = self.get_collection_names()
         collection_names = collections[0]
+        edge_collections = collections[1]
         for collection in collection_names:
             if self.has_collection(collection):
                 # build the AQL query string
                 # time must be YYYY-MM-DDTHH:mm:ss.sssZ
                 aql_query = """
                             FOR doc IN @@collection
-                                FILTER doc._key == @key
-                                LET edges = @include_edges ? (
-                                FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
-                                    LET connectedDocs = @include_edges ? (
-                                    FOR e IN edges
-                                    LET startDoc = DOCUMENT(e._from)
-                                    LET endDoc = DOCUMENT(e._to)
-                                    RETURN startDoc._id == doc._id ? endDoc : startDoc
-                                    ) : []
-                                    RETURN {doc, edges, connectedDocs}
+                                FILTER doc._key == @key   
+                                RETURN doc
                             """
                 # prepare the query for execution
                 result += self.aql_execute(
                     aql_query,
                     bind_vars={
                         "@collection": collection,
-                        "@edge_collection": edgeCollection,
-                        **query_params
+                        "key": key
                     }
                 )
 
-        return result
+                if includeEdges and len(result) > 0:
+                    # print(dict(result)['_id'])
+                    print(result[0]['_id'])
+                    for collection in edge_collections:
+                        aql_query = """ 
+                                    LET edges = (
+                                    FOR e IN @@collection
+                                    FILTER e._from == @doc_id || e._to == @doc_id
+                                    RETURN e
+                                    ) 
+
+                                    LET connectedDocs = (
+                                    FOR e IN edges
+                                    LET startDoc = DOCUMENT(e._from)
+                                    LET endDoc = DOCUMENT(e._to)
+                                    RETURN startDoc._id == @doc_id ? endDoc : startDoc
+                                    )
+
+                                    RETURN connectedDocs
+                                    """
+                        res = self.aql_execute(
+                        aql_query,
+                        bind_vars={
+                            "@collection": collection,
+                            "doc_id":result[0]['_id']
+                            }
+                        )
+                        if res[0]:
+                            connectedDocs += res
+                    # break out after all of the edge collections have been searched
+                    break 
+                    
+
+        return result, connectedDocs
 
     def get_recent_documents(self, collections, hoursAgo):
         """Return a list of recent documents from the collection

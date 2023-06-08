@@ -41,10 +41,9 @@ async def root():
 
 @app.get("/get_document_by_key")
 async def get_document_by_key(key:str,
-                              includeEdges:bool,
-                              edgeCollection:str | None = ""):
+                              includeEdges:bool):
     #gets a single document and its connection by key
-    docs = database_manager.get_document_by_key(key,includeEdges, edgeCollection)
+    docs = database_manager.get_document_by_key(key,includeEdges)
     return docs
 
 @app.get("/get_collection_names")
