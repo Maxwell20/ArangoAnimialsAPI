@@ -422,4 +422,179 @@ class ArangoDatabaseManager:
         #remove extra results to fit page size
         result = self.sort_documents(result, pageSize)
         return result
+    
+
+    def get_specified_documents_pages2(self, pageSize=10, pageNumber=1, startTime="",
+                                endTime="", longStart="", longEnd="",
+                                latStart="", latEnd="", country="",
+                                type="", attribute1Start = "", 
+                                attribute1End = "", attribute2Start = "",
+                                attribute2End = "", include_edges=""):
+        """Function: get_specified_documents_pages
+           Purpose: returns the filtered result across a list of collections page by page for use with a 
+           paged front end
+        """
+        result = []
+        # calculate offset
+        offset = (pageNumber - 1) * pageSize
+        count = pageSize
+
+        # define the query parameters
+        query_params = {
+            "start_time": startTime,
+            "end_time": endTime,
+            "latStart": latStart,
+            "latEnd": latEnd,
+            "longStart": longStart,
+            "longEnd": longEnd,
+            "country": country,
+            "species": type,
+            "attribute1Start": attribute1Start,
+            "attribute1End": attribute1End,
+            "attribute2Start": attribute2Start,
+            "attribute2End": attribute2End,
+            "include_edges": include_edges,
+            "offset": offset,
+            "count": count
+        }
+
+        db_collections = self.get_collection_names()
+        collections = db_collections[0]
+        edgeCollections = db_collections[1]
+        for collection, edgeCollection in zip(collections, edgeCollections):
+            if self.has_collection(collection):
+                # build the AQL query string
+                # time must be YYYY-MM-DDTHH:mm:ss.sssZ
+                # exclude documents with edges if exclude_edges is True
+                # index of collections and corresponding edge collections must match
+                aql_query = """
+                            FOR doc IN @@collection
+                                FILTER (!@start_time || doc.timestamp >= @start_time)
+                                FILTER (!@end_time || doc.timestamp <= @end_time)
+                                FILTER (!@latStart || doc.latitude >= @latStart)
+                                FILTER (!@latEnd || doc.latitude <= @latEnd)
+                                FILTER (!@longStart || doc.longitude >= @longStart)
+                                FILTER (!@longEnd || doc.longitude <= @longEnd)
+                                FILTER (!@country || doc.country == @country)
+                                FILTER (!@species || doc.species == @species)
+                                FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
+                                FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
+                                FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
+                                FILTER (!@attribute2End || doc.attribute2 <= @attribute2End)
+                                SORT doc.timestamp DESC
+                                LIMIT @offset, @count
+                                LET edges = @include_edges ? (
+                                FOR e IN @@edge_collection FILTER e._from == doc._id || e._to == doc._id RETURN e) : []
+                                LET connectedDocs = @include_edges ? (
+                                FOR e IN edges
+                                LET startDoc = DOCUMENT(e._from)
+                                LET endDoc = DOCUMENT(e._to)
+                                RETURN startDoc._id == doc._id ? endDoc : startDoc
+                                ) : []
+                                RETURN {doc, edges, connectedDocs}
+                            """
+                # prepare the query for execution
+                result += self.aql_execute(
+                    aql_query,
+                    bind_vars={
+                        "@collection": collection,
+                        "@edge_collection": edgeCollection,
+                        **query_params
+                    }
+                )
+        ## filters out unwanted connections
+        # if connectionFilter[0] != '':
+        #     result = self.filter_connected_docs(result, connectionFilter)
+        #remove extra results to fit page size
+        result = self.sort_documents(result, pageSize)
+        return result
+    
+    def get_specified_documents_pages3(self, pageSize=10, pageNumber=1, startTime="",
+                                    endTime="", longStart="", longEnd="",
+                                    latStart="", latEnd="", country="",
+                                    type="", attribute1Start = "", 
+                                    attribute1End = "", attribute2Start = "",
+                                    attribute2End = "", include_edges=""):
+        specified_documents = []
+        connected_documents = []
+        db_collections = self.get_collection_names()
+        collections = db_collections[0]
+        edge_collections = db_collections[1]  
+        for collection_name in collections:
+            # Initialize the AQL query string
+            query = f"FOR doc IN {collection_name} "
+
+            # Build the filter conditions based on the provided criteria
+            filters = []
+            if startTime:
+                filters.append("doc.startTime >= @startTime")
+            if endTime:
+                filters.append("doc.endTime <= @endTime")
+            if longStart:
+                filters.append("doc.longitude >= @longStart")
+            if longEnd:
+                filters.append("doc.longitude <= @longEnd")
+            if latStart:
+                filters.append("doc.latitude >= @latStart")
+            if latEnd:
+                filters.append("doc.latitude <= @latEnd")
+            if country:
+                filters.append("doc.country == @country")
+            if type:
+                filters.append("doc.type == @type")
+            if attribute1Start:
+                filters.append("doc.attribute1 >= @attribute1Start")
+            if attribute1End:
+                filters.append("doc.attribute1 <= @attribute1End")
+            if attribute2Start:
+                filters.append("doc.attribute2 >= @attribute2Start")
+            if attribute2End:
+                filters.append("doc.attribute2 <= @attribute2End")
+
+            # Combine the filter conditions into a single AQL filter string
+            if filters:
+                query += "FILTER " + " && ".join(filters) + " "
+
+            # Calculate the skip value based on the page number and page size
+            skip = (pageNumber - 1) * pageSize
+
+            # Append the LIMIT and OFFSET clauses to the AQL query
+            query += "LIMIT @pageSize OFFSET @skip "
+
+            # Define the AQL query parameters
+            bind_vars = {
+                "startTime": startTime,
+                "endTime": endTime,
+                "longStart": longStart,
+                "longEnd": longEnd,
+                "latStart": latStart,
+                "latEnd": latEnd,
+                "country": country,
+                "type": type,
+                "attribute1Start": attribute1Start,
+                "attribute1End": attribute1End,
+                "attribute2Start": attribute2Start,
+                "attribute2End": attribute2End,
+                "pageSize": pageSize,
+                "skip": skip
+            }
+
+            # Execute the AQL query to get the specified documents
+            documents = self.db.aql.execute(query, bind_vars=bind_vars)
+            specified_documents.extend(documents)
+
+            if include_edges:
+                # Loop through the specified documents and get the connected documents from edge collections
+                for doc in documents:
+                    # Query the edge collections based on the specified document's _id
+                    for edge_collection in edge_collections:
+                        edge_query = f"FOR edge IN {edge_collection} FILTER edge._from == @documentId RETURN edge._to"
+                        edge_bind_vars = {"documentId": doc["_id"]}
+                        connected_docs = self.db.aql.execute(edge_query, bind_vars=edge_bind_vars)
+                        connected_documents.extend(connected_docs)
+
+        if include_edges:
+            return specified_documents, connected_documents
+
+        return specified_documents
 #UNCLASSIFIED

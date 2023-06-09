@@ -117,6 +117,29 @@ async def get_documents_paged(  collections: str,
 
     return docs
 
+@app.get("/get_documents_paged_proto")
+async def get_documents_paged_proto( 
+                        pageSize:int ,
+                        pageNumber:int,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        includeEdges:bool | None = ""
+                        ):
+    
+    docs = database_manager.get_specified_documents_pages3(pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
+
+    return docs
+
 def authenticate_to_db():
     global database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
