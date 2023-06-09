@@ -167,8 +167,6 @@ class ArangoDatabaseManager:
                 )
 
                 if includeEdges and len(result) > 0:
-                    # print(dict(result)['_id'])
-                    print(result[0]['_id'])
                     for collection in edge_collections:
                         aql_query = """ 
                                     LET edges = (
