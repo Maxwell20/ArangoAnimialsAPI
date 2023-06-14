@@ -83,14 +83,14 @@ async def get_documents(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
 
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -114,13 +114,13 @@ async def get_documents_paged(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
