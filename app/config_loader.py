@@ -19,7 +19,7 @@ from collections import namedtuple
 
 UvicornConfig = namedtuple(
     "UvicornConfig",
-    "host port ssl_certfile ssl_keyfile ssl_cert_reqs ssl_ca_certs log_config"
+    "reverse_proxy_on host port ssl_certfile ssl_keyfile ssl_cert_reqs ssl_ca_certs log_config_file"
 )
 
 class BaseUvicornConfigLoader(ABC):
@@ -49,22 +49,24 @@ class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
         """The things we need are stored in env vars
         """
         try:
+            reverse_proxy_on = os.environ["reverse_proxy_on"] 
             host = os.environ["UVICORN_HOST"]
             port = os.environ["UVICORN_PORT"]
             ssl_certfile = os.environ["UVICORN_ssl-certfile"]
             ssl_keyfile = os.environ["UVICORN_ssl-keyfile"]
             ssl_cert_reqs = os.environ["UVICORN_ssl-cert-reqs"]
             ssl_ca_certs = os.environ["UVICORN_ssl-ca-certs"]
-            log_config = os.environ["UVICORN_log-config"]
+            log_config_file = os.environ["UVICORN_log-config"]
 
             return UvicornConfig(
+                reverse_proxy_on = reverse_proxy_on,
                 host = host,
                 port = port,
                 ssl_certfile = ssl_certfile,
                 ssl_keyfile = ssl_keyfile,
                 ssl_cert_reqs = ssl_cert_reqs,
                 ssl_ca_certs = ssl_ca_certs,
-                log_config = log_config,
+                log_config_file = log_config_file,
             )
         # Probably want to think about how we want to fail here
         except Exception as e:

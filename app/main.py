@@ -77,14 +77,14 @@ async def get_documents(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
 
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -108,50 +108,54 @@ async def get_documents_paged(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
-def authenticate_to_db():
+def init_authenticate_to_db():
     global database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
-    config = UvicornConfigEnvironmentVarLoader().build_config()
     database_manager = ArangoDatabaseManager(
         database_name = credentials.database,
         username = credentials.username,
         password = credentials.password,
         host = credentials.host
     )
-    return config
+    return database_manager
 
 
 if __name__ == '__main__':
     #start from main: python main.py
-    config = authenticate_to_db()
-    
-    with open(config.log_config, 'r') as stream: 
-        logConfig = yaml.load(stream, Loader=yaml.FullLoader)
-    logging.config.dictConfig(logConfig)
-
-
+    global database_manager
+    global app_server_config
+    database_manager = init_authenticate_to_db()
+    app_server_config = UvicornConfigEnvironmentVarLoader().build_config()
+    # server is not configured yet so logger is also not configured.
+    with open(app_server_config.log_config_file, 'r') as stream: 
+        log_config_file = yaml.load(stream, Loader=yaml.FullLoader)
+    logging.config.dictConfig(log_config_file)
     log = logging.getLogger(__name__)
     
-    # time.sleep(5)
+    time.sleep(5)
     # log.warning('This is a warning message from logger %s' , "hi")
     # log.error('This is an error message from logger %s' , "hi")
     # log.critical('This is a critical message from logger %s' , "hi")
-      
-    log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
-    log.debug('Server https cert %s' , config.ssl_keyfile)
-    log.debug('Server https private key %s' , config.ssl_certfile)
-    log.debug('logging config file %s' , config.log_config)
-    uvicorn.run(app, host=config.host, port=int(config.port), ssl_ca_certs=config.ssl_ca_certs, ssl_cert_reqs=int(config.ssl_cert_reqs), ssl_keyfile=config.ssl_keyfile, ssl_certfile=config.ssl_certfile, log_config=config.log_config)
+    
+    log.debug('Proxy is %s' , app_server_config.reverse_proxy_on)
+    if bool("true" == app_server_config.reverse_proxy_on.lower()) :
+        uvicorn.run(app, host=app_server_config.host, port=int(app_server_config.port), ssl_keyfile=app_server_config.ssl_keyfile, ssl_certfile=app_server_config.ssl_certfile, log_config=app_server_config.log_config_file)
+    else :    
+        log.debug('Accepted signing CAs for client cert %s' , app_server_config.ssl_ca_certs)
+        log.debug('Server https cert %s' , app_server_config.ssl_keyfile)
+        log.debug('Server https private key %s' , app_server_config.ssl_certfile)
+        log.debug('logging app_server_config file %s' , app_server_config.log_config_file)
+        uvicorn.run(app, host=app_server_config.host, port=int(app_server_config.port), ssl_ca_certs=app_server_config.ssl_ca_certs, ssl_cert_reqs=int(app_server_config.ssl_cert_reqs), ssl_keyfile=app_server_config.ssl_keyfile, ssl_certfile=app_server_config.ssl_certfile, log_config=app_server_config.log_config_file)
     
 
 #UNCLASSIFIED
