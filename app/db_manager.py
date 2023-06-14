@@ -128,6 +128,7 @@ class ArangoDatabaseManager:
         """Function: filter_connected_docs
            Purpose: removes unwanted data from the connections results since we cant do
             that in the AQL query
+            retrun only the connected documents from the specified collections
         """
         for item in aqlResult:
             connected_docs = item.get("connectedDocs")
@@ -262,24 +263,21 @@ class ArangoDatabaseManager:
         return result, connectedDocs
 
 
-    def get_recent_documents(self, collections, hoursAgo):
+    def get_recent_documents(self, hoursAgo):
         """Return a list of recent documents from the collection
         """
         dt_start, dt_end = start_end_times_from_hoursago(hoursago=hoursAgo)
-        result = list()
-        time_col = "start_time"
-        if isinstance(collections, str):
-            collection_names = [collections]
+        result = []
+        collection_names = self.get_collection_names()[0]
         for collection_name in collection_names:
             query = """
-                    LET dtprev = @dt_start
-                    FOR doc in @@collection
-                        FILTER doc.timestamp >= dtprev
+                    FOR doc IN @@collection
+                        FILTER doc.timestamp >= @dt_start
                         RETURN doc
                     """
             result += self.aql_execute(
                 query,
-                bind_vars={"collection":collection_name ,"dt_start":dt_start, "time_col":time_col}
+                bind_vars={"@collection": collection_name, "dt_start": dt_start}
             )
         return result
     
@@ -296,21 +294,7 @@ class ArangoDatabaseManager:
         result = []
 
         # define the query parameters
-        query_params = {
-            "start_time": startTime,
-            "end_time": endTime,
-            "latStart": latStart,
-            "latEnd": latEnd,
-            "longStart": longStart,
-            "longEnd": longEnd,
-            "country": country,
-            "species": type,
-            "attribute1Start": attribute1Start,
-            "attribute1End": attribute1End,
-            "attribute2Start": attribute2Start,
-            "attribute2End": attribute2End,
-            "include_edges": include_edges,
-        }
+
         if isinstance(collections, str):
             collections = [collections]
         if isinstance(edgeCollections, str):
@@ -321,6 +305,21 @@ class ArangoDatabaseManager:
                 # exclude documents with edges if exclude_edges is True
                 # index of collections and corresponding edge collections must match
                 if excludeEdges:
+                    query_params = {
+                                        "start_time": startTime,
+                                        "end_time": endTime,
+                                        "latStart": latStart,
+                                        "latEnd": latEnd,
+                                        "longStart": longStart,
+                                        "longEnd": longEnd,
+                                        "country": country,
+                                        "species": type,
+                                        "attribute1Start": attribute1Start,
+                                        "attribute1End": attribute1End,
+                                        "attribute2Start": attribute2Start,
+                                        "attribute2End": attribute2End,
+                                    }
+                    # get doucuments that do not have edge connections
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -339,6 +338,21 @@ class ArangoDatabaseManager:
                                     RETURN doc
                                 """
                 else:
+                    query_params = {
+                                        "start_time": startTime,
+                                        "end_time": endTime,
+                                        "latStart": latStart,
+                                        "latEnd": latEnd,
+                                        "longStart": longStart,
+                                        "longEnd": longEnd,
+                                        "country": country,
+                                        "species": type,
+                                        "attribute1Start": attribute1Start,
+                                        "attribute1End": attribute1End,
+                                        "attribute2Start": attribute2Start,
+                                        "attribute2End": attribute2End,
+                                        "include_edges": include_edges,
+                                    }
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -372,12 +386,16 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-        if connectionFilter[0] != '':
-            result = self.filter_connected_docs(result, connectionFilter)
+        if connectionFilter:
+            if connectionFilter[0] != '':
+                result = self.filter_connected_docs(result, connectionFilter)
         return result
     
     def sort_documents(self, documents, num_documents):
-        sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['doc']['timestamp']), reverse=True)
+        if 'doc' in documents[0]:
+            sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['doc']['timestamp']), reverse=True)
+        else:
+            sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['timestamp']), reverse=True)
         return sorted_documents[:num_documents]
     
     def get_specified_documents_pages(self, collections, pageSize=10, pageNumber=1, startTime="",
@@ -395,24 +413,7 @@ class ArangoDatabaseManager:
         offset = (pageNumber - 1) * pageSize
         count = pageSize
 
-        # define the query parameters
-        query_params = {
-            "start_time": startTime,
-            "end_time": endTime,
-            "latStart": latStart,
-            "latEnd": latEnd,
-            "longStart": longStart,
-            "longEnd": longEnd,
-            "country": country,
-            "species": type,
-            "attribute1Start": attribute1Start,
-            "attribute1End": attribute1End,
-            "attribute2Start": attribute2Start,
-            "attribute2End": attribute2End,
-            "include_edges": include_edges,
-            "offset": offset,
-            "count": count
-        }
+
         if isinstance(collections, str):
             collections = [collections]
         if isinstance(edgeCollections, str):
@@ -424,6 +425,23 @@ class ArangoDatabaseManager:
                 # exclude documents with edges if exclude_edges is True
                 # index of collections and corresponding edge collections must match
                 if excludeEdges:
+                            # define the query parameters
+                    query_params = {
+                        "start_time": startTime,
+                        "end_time": endTime,
+                        "latStart": latStart,
+                        "latEnd": latEnd,
+                        "longStart": longStart,
+                        "longEnd": longEnd,
+                        "country": country,
+                        "species": type,
+                        "attribute1Start": attribute1Start,
+                        "attribute1End": attribute1End,
+                        "attribute2Start": attribute2Start,
+                        "attribute2End": attribute2End,
+                        "offset": offset,
+                        "count": count
+                    }
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -444,6 +462,24 @@ class ArangoDatabaseManager:
                                     RETURN doc
                                 """            
                 else:
+                            # define the query parameters
+                    query_params = {
+                            "start_time": startTime,
+                            "end_time": endTime,
+                            "latStart": latStart,
+                            "latEnd": latEnd,
+                            "longStart": longStart,
+                            "longEnd": longEnd,
+                            "country": country,
+                            "species": type,
+                            "attribute1Start": attribute1Start,
+                            "attribute1End": attribute1End,
+                            "attribute2Start": attribute2Start,
+                            "attribute2End": attribute2End,
+                            "include_edges": include_edges,
+                            "offset": offset,
+                            "count": count
+                        }
                     aql_query = """
                                 FOR doc IN @@collection
                                     FILTER (!@start_time || doc.timestamp >= @start_time)
@@ -479,10 +515,11 @@ class ArangoDatabaseManager:
                         **query_params
                     }
                 )
-            # filters out unwanted connections
-        if connectionFilter[0] != '':
-            result = self.filter_connected_docs(result, connectionFilter)
-        #remove extra results to fit page size
+        # filters out unwanted connections
+        if connectionFilter:
+            if connectionFilter[0] != '':
+                result = self.filter_connected_docs(result, connectionFilter)
+        # remove extra results to fit page size
         result = self.sort_documents(result, pageSize)
         return result
     
@@ -505,9 +542,9 @@ class ArangoDatabaseManager:
             # Build the filter conditions based on the provided criteria
             filters = []
             if startTime:
-                filters.append(f"doc.startTime >= {startTime}")
+                filters.append(f"doc.timestamp >= '{startTime}'")
             if endTime:
-                filters.append(f"doc.endTime <= {endTime}")
+                filters.append(f"doc.timestamp <= '{endTime}'")
             if longStart:
                 filters.append(f"doc.longitude >= {longStart}")
             if longEnd:
@@ -517,9 +554,9 @@ class ArangoDatabaseManager:
             if latEnd:
                 filters.append(f"doc.latitude <= {latEnd}")
             if country:
-                filters.append(f"doc.country == {country}")
+                filters.append(f"doc.country == '{country}'")
             if type:
-                filters.append(f"doc.type == {type}")
+                filters.append(f"doc.species == '{type}'")
             if attribute1Start:
                 filters.append(f"doc.attribute1 >= {attribute1Start}")
             if attribute1End:
@@ -553,11 +590,29 @@ class ArangoDatabaseManager:
                         edge_bind_vars = {"documentId": doc["_id"]}
                         connected_docs = self.db.aql.execute(edge_query, bind_vars=edge_bind_vars)
                         connected_documents.extend(connected_docs)
+    # prepare the final result in the desired format
+        result = []
+        for doc in specified_documents:
+            result_item = {
+                "doc": doc,
+                "edges": [],
+                "connectedDocs": []
+            }
+            result.append(result_item)
 
         if include_edges:
-            return specified_documents, connected_documents
+            for edge in connected_documents:
+                for item in result:
+                    if edge["_from"].split("/")[1] == item["doc"]["_key"]:
+                        item["edges"].append(edge)
+                        item["connectedDocs"].append(edge["_to"])
 
-        return specified_documents
+        result = self.sort_documents(result, pageSize)
+
+        if include_edges:
+            return result
+        return result
+    
     def search_all_collections(self, startTime="",
                                     endTime="", longStart="", longEnd="",
                                     latStart="", latEnd="", country="",
@@ -577,9 +632,9 @@ class ArangoDatabaseManager:
             # Build the filter conditions based on the provided criteria
             filters = []
             if startTime:
-                filters.append(f"doc.startTime >= {startTime}")
+                filters.append(f"doc.timestamp >= '{startTime}'")
             if endTime:
-                filters.append(f"doc.endTime <= {endTime}")
+                filters.append(f"doc.timestamp <= '{endTime}'")
             if longStart:
                 filters.append(f"doc.longitude >= {longStart}")
             if longEnd:
@@ -589,9 +644,9 @@ class ArangoDatabaseManager:
             if latEnd:
                 filters.append(f"doc.latitude <= {latEnd}")
             if country:
-                filters.append(f"doc.country == {country}")
+                filters.append(f"doc.country == '{country}'")
             if type:
-                filters.append(f"doc.type == {type}")
+                filters.append(f"doc.species == '{type}'")
             if attribute1Start:
                 filters.append(f"doc.attribute1 >= {attribute1Start}")
             if attribute1End:
@@ -623,8 +678,25 @@ class ArangoDatabaseManager:
                         connected_docs = self.db.aql.execute(edge_query, bind_vars=edge_bind_vars)
                         connected_documents.extend(connected_docs)
 
-        if include_edges:
-            return specified_documents, connected_documents
+    # prepare the final result in the desired format
+        result = []
+        for doc in specified_documents:
+            result_item = {
+                "doc": doc,
+                "edges": [],
+                "connectedDocs": []
+            }
+            result.append(result_item)
 
+        if include_edges:
+            for edge in connected_documents:
+                for item in result:
+                    if edge["_from"].split("/")[1] == item["doc"]["_key"]:
+                        item["edges"].append(edge)
+                        item["connectedDocs"].append(edge["_to"])
+
+        if include_edges:
+            return result
+        
         return specified_documents
 #UNCLASSIFIED
