@@ -41,10 +41,16 @@ async def root():
 
 @app.get("/get_document_by_key")
 async def get_document_by_key(key:str,
-                              includeEdges:bool,
-                              edgeCollection:str | None = ""):
+                              includeEdges:bool):
     #gets a single document and its connection by key
-    docs = database_manager.get_document_by_key(key,includeEdges, edgeCollection)
+    docs = database_manager.get_document_by_key(key, includeEdges)
+    return docs
+
+@app.get("/get_document_by_id")
+async def get_document_by_key(id:str,
+                              includeEdges:bool):
+    #gets a single document and its connection by id
+    docs = database_manager.get_document_by_id(id, includeEdges)
     return docs
 
 @app.get("/get_collection_names")
@@ -77,14 +83,14 @@ async def get_documents(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
 
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -108,13 +114,57 @@ async def get_documents_paged(  collections: str,
                         includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collecitonFilter:str | None = ""
+                        collectionFilter:str | None = ""
                         ):
     collections = collections.split(",")
-    collecitonFilter = collecitonFilter.split(",")
+    collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collecitonFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
+
+    return docs
+
+@app.get("/get_search_all_paged")
+async def get_search_all_paged( 
+                        pageSize:int ,
+                        pageNumber:int,
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        includeEdges:bool | None = ""
+                        ):
+    
+    docs = database_manager.search_all_collections_paged(pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
+
+    return docs
+
+@app.get("/get_search_all")
+async def get_search_all( 
+                        startTime: str  | None = "",
+                        endTime: str | None = "",
+                        longStart: float | None = "",
+                        longEnd: float | None = "",
+                        latStart: float | None = "", 
+                        latEnd: float | None = "", 
+                        country:str | None = "",
+                        type:str | None = "",
+                        attribute1Start:float | None = "",
+                        attribute1End:float | None = "",
+                        attribute2Start:float | None = "",
+                        attribute2End:float | None = "",
+                        includeEdges:bool | None = ""
+                        ):
+    
+    docs = database_manager.search_all_collections_paged(startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
 
     return docs
 
@@ -141,11 +191,6 @@ if __name__ == '__main__':
 
 
     log = logging.getLogger(__name__)
-    
-    # time.sleep(5)
-    # log.warning('This is a warning message from logger %s' , "hi")
-    # log.error('This is an error message from logger %s' , "hi")
-    # log.critical('This is a critical message from logger %s' , "hi")
       
     log.debug('Accepted signing CAs for client cert %s' , config.ssl_ca_certs)
     log.debug('Server https cert %s' , config.ssl_keyfile)
