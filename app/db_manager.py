@@ -15,6 +15,7 @@ Base classes and functionality for database management.
 from arango import ArangoClient
 from datetime_utils import *
 from datetime import datetime
+import logging
 
 class ArangoDatabaseManager:
     """Arango database management object
@@ -80,6 +81,10 @@ class ArangoDatabaseManager:
         """Apply the query using AQL and return the results
            as a list
         """
+        log = logging.getLogger(__name__)
+        log.debug('q string --- %s' , query_string)
+        log.debug('binding var %s' , bind_vars)
+        
         return [
             document for document in self.db.aql.execute(
                 query_string, bind_vars=bind_vars
