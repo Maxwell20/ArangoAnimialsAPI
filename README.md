@@ -64,30 +64,43 @@ for the swagger docs
                     "UVICORN_log-config":"/home/max/prj/colsa/ArangoAnimalsAPI/app/config/log_conf_dev.yml"
                 },
                 "sudo": true
+            },
+            {
+                "name": "test_db_manager",
+                "type": "python",
+                "request": "launch",
+                "module": "pytest",
+                "args": [
+                    "app/test_db_manager.py"
+                ],
+                "console": "integratedTerminal",
+                "justMyCode": true
             }
         ]
     }
 
 # Dependancies:
-## certificates
+## Certificates:
 this project is intended to run over ssl/tls using https secure protocol.
 certificates for testing are located under:
     /certs
 refer to the certificate readme file for more information in the certificate folder.
 
 
-## to update the required dependancies for the docker image
+## To update the required dependancies for the docker image:
 generate a new requirements.txt file 
     pip freeze > requirements.txt
 Then rebuild the docker image and run the container again
 
-# Unit Test
-to test a file name the file "test_\<file-to-test>.py" replace \<file-to-test> with the file name the unit test-test. 
-then run
+## Unit Test:
+to test a file name the file "test_<file-to-test>.py" replace \<file-to-test> with the file name the unit test-test. 
+to run all unit test:
     pytest
-this will automatically run all the unit test.
+to run one unit test file:
+    pytest <file-to-test>
 
 IMPRTANT NOTE: you must install pytest. pytest isnt included in the virtual environment as it adds alot of packages and not needed on the deployed version. you need to uninstall pytest to build deployed version. 
+to install:
     pip install pytest
-or 
+to uninstall: 
     pip uninstall pytest
