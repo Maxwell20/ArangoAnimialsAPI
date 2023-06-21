@@ -42,27 +42,61 @@ async def root():
 @app.get("/get_document_by_key")
 async def get_document_by_key(key:str,
                               includeEdges:bool):
-    #gets a single document and its connection by key
+    """
+    Retrieve an item by key.
+
+    Args:
+        key: The datbase key of the item to retrieve.
+
+    Returns:
+        dict: a single document and its edges and connections
+    """
     docs = database_manager.get_document_by_key(key, includeEdges)
     return docs
 
 @app.get("/get_document_by_id")
 async def get_document_by_key(id:str,
                               includeEdges:bool):
+    """
+    Retrieve an item by ID.
+
+    Args:
+        id: The ID of the item to retrieve.
+
+    Returns:
+        dict: The retrieved item information.
+    """
     #gets a single document and its connection by id
     docs = database_manager.get_document_by_id(id, includeEdges)
     return docs
 
 @app.get("/get_collection_names")
 async def get_collection_names():
-   return database_manager.get_collection_names()
+    """
+    Retrieve an item by ID.
+
+    Args:
+        none
+
+    Returns:
+        dict: name of each collection in the database
+    """
+    return database_manager.get_collection_names()
 
 
 #example only remove later
 @app.get("/get_recent")
-async def get_recent(hours_ago:int,
-                     collections:str):
-    docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
+async def get_recent(hours_ago:int):
+    """
+    Retrieves recent documents.
+
+    Args:
+        int: hours_ago 
+
+    Returns:
+        dict: documents with a timestamp that falls within the hours ago
+    """
+    docs = database_manager.get_recent_documents(hoursAgo = 0 )
     return docs
 
 #index of collections and corresponding edge collections must match
@@ -80,17 +114,41 @@ async def get_documents(  collections: str,
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
-                        includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collectionFilter:str | None = ""
                         ):
+    """
+    Retrieves filterd search of specified collections, documents.
+
+    Args:
+        collections: str: comma separated list of collections to search
+        (optional) startTime: str: time range start
+        (optional) endTime: str: time range end
+        (optional) longStart: int: longitude range start
+        (optional) longEnd: int: longitude range end
+        (optional) latStart: int: latitude range start
+        (optional) latEnd: latitude range end
+        (optional) country: str: only include this country in results
+        (optional) type: str: only include this type in results
+        (optional) attribute1Start: float: atrribute 1 start range
+        (optional) attribute1End: float: atrribute 1 end range
+        (optional) attribute2Start: float: atrribute 2 start range
+        (optional) attribute2End: float: atrribute 2 end range
+        (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+        (optional) excludeEdges: bool: only return documents without edge connections if true default false
+        (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others
+    Returns:
+        dict: documents, edges, connectedDocuments
+        or
+        dict: documents
+    """
     collections = collections.split(",")
     collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
 
     
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -111,16 +169,42 @@ async def get_documents_paged(  collections: str,
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
                         attribute2End:float | None = "",
-                        includeEdges:bool | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
                         collectionFilter:str | None = ""
                         ):
+    """
+    Retrieves filterd search of specified collections, documents.
+
+    Args:
+        collections: str: comma separated list of collections to search
+        pageSize: int: amount of results for a page to include
+        pageNumber: index of page to return
+        (optional) startTime: str: time range start
+        (optional) endTime: str: time range end
+        (optional) longStart: int: longitude range start
+        (optional) longEnd: int: longitude range end
+        (optional) latStart: int: latitude range start
+        (optional) latEnd: latitude range end
+        (optional) country: str: only include this country in results
+        (optional) type: str: only include this type in results
+        (optional) attribute1Start: float: atrribute 1 start range
+        (optional) attribute1End: float: atrribute 1 end range
+        (optional) attribute2Start: float: atrribute 2 start range
+        (optional) attribute2End: float: atrribute 2 end range
+        (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+        (optional) excludeEdges: bool: only return documents without edge connections if true default false
+        (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others
+    Returns:
+        dict: documents, edges, connectedDocuments
+        or
+        dict: documents
+    """
     collections = collections.split(",")
     collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges, edgeCollections, excludeEdges, collectionFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -142,6 +226,31 @@ async def get_search_all_paged(
                         attribute2End:float | None = "",
                         includeEdges:bool | None = ""
                         ):
+    """
+    Retrieves filterd search of all collections, documents.
+
+    Args:
+        pageSize: int: amount of results for a page to include
+        pageNumber: index of page to return
+        (optional) startTime: str: time range start
+        (optional) endTime: str: time range end
+        (optional) longStart: int: longitude range start
+        (optional) longEnd: int: longitude range end
+        (optional) latStart: int: latitude range start
+        (optional) latEnd: latitude range end
+        (optional) country: str: only include this country in results
+        (optional) type: str: only include this type in results
+        (optional) attribute1Start: float: atrribute 1 start range
+        (optional) attribute1End: float: atrribute 1 end range
+        (optional) attribute2Start: float: atrribute 2 start range
+        (optional) attribute2End: float: atrribute 2 end range
+        (optional) includeEdges: true to include edges and connected docs
+
+    Returns:
+        dict: documents, edges, connectedDocuments
+        or
+        dict: documents
+    """
     
     docs = database_manager.search_all_collections_paged(pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
 
@@ -163,8 +272,31 @@ async def get_search_all(
                         attribute2End:float | None = "",
                         includeEdges:bool | None = ""
                         ):
+    """
+    Retrieves filterd search of all collections, documents.
+
+    Args:
+        (optional) startTime: str: time range start
+        (optional) endTime: str: time range end
+        (optional) longStart: int: longitude range start
+        (optional) longEnd: int: longitude range end
+        (optional) latStart: int: latitude range start
+        (optional) latEnd: latitude range end
+        (optional) country: str: only include this country in results
+        (optional) type: str: only include this type in results
+        (optional) attribute1Start: float: atrribute 1 start range
+        (optional) attribute1End: float: atrribute 1 end range
+        (optional) attribute2Start: float: atrribute 2 start range
+        (optional) attribute2End: float: atrribute 2 end range
+        (optional) includeEdges: true to include edges and connected docs
+    Returns:
+        dict: documents, edges, connectedDocuments
+        or
+        dict: documents
+    """
+                        
     
-    docs = database_manager.search_all_collections_paged(startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
+    docs = database_manager.search_all_collections(startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, includeEdges)
 
     return docs
 
