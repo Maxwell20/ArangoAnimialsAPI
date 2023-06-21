@@ -7,36 +7,62 @@ __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
 #UNCLASSIFIED
-#file@test_main.py
 """
+file@test_main.py
 Unit test for api endpoints
+We test mostly just for the api to return OK
+in this since test_db_manager.py has 
+test for the database calls already
 """
 
 from fastapi.testclient import TestClient
 from main import app, authenticate_to_db
-import os
 
 client = TestClient(app)
-
 def test_read_main():
-    print("test main")
+    authenticate_to_db()
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Hello World"}
+
+def test_get_document_by_key():
+    authenticate_to_db()
+    response = client.get("/get_document_by_key?key=af03d7e9bf1b9d2d&includeEdges=false")
+    assert response.status_code == 200
+    
+def test_get_document_by_id():
+    authenticate_to_db()
+    response = client.get("/get_document_by_id?id=sightings%2Faf03d7e9bf1b9d2d&includeEdges=false")
+    assert response.status_code == 200
+
+def test_get_collection_names():
+    authenticate_to_db()
+    response = client.get("/get_collection_names")
+    assert response.status_code == 200
+
+def test_get_recent():
+    authenticate_to_db()
+    response = client.get("/get_recent?hours_ago=24")
+    assert response.status_code == 200
+
 
 def test_get_documents():
-    print("testing time range query")
-    os.environ["ARANGO_HOST"] = "http://localhost:1234/"
-    os.environ["ARANGO_DATABASE"] ="SightingsDatabase"
-    os.environ["ARANGO_USERNAME"] ="root"
-    os.environ["ARANGO_PASSWORD"] ="adbpwd"
-    os.environ["UVICORN_HOST"] ="0.0.0.0"
-    os.environ["UVICORN_PORT"] ="443"
     authenticate_to_db()
     response = client.get("/get_documents?collections=sightings&startTime=2018-07-11T12%3A50%3A40&endTime=2018-07-12T12%3A50%3A40")
     assert response.status_code == 200
-    print(response.content)
-    assert response.content == b'[{"doc":{"_key":"50g7a3g8b9d07583","_id":"sightings/50g7a3g8b9d07583","_rev":"_f3sYomG--A","country":"NorthTemperateZone","longitude":-22.638144419683705,"true_sighting_id":"984de599b1625e2f","timestamp":"2018-07-11T12:50:40","latitude":54.989758481673206,"species":"RadioactiveWeasel"},"edges":[]},{"doc":{"_key":"17e79da93312140f","_id":"sightings/17e79da93312140f","_rev":"_f3sYoma-_e","country":"NorthZone","longitude":-135.83006102266216,"true_sighting_id":"3048dbg806g1d87e","timestamp":"2018-07-12T10:36:39","latitude":72.88765868577106,"species":"PolarBear"},"edges":[]},{"doc":{"_key":"e0g5845d963f8cbd","_id":"sightings/e0g5845d963f8cbd","_rev":"_f3sYooi-_T","country":"NorthTemperateZone","longitude":-18.374000132500367,"true_sighting_id":"5g7c3afge8e2ef06","timestamp":"2018-07-11T14:39:30","latitude":46.82536179305713,"species":"RadioactiveWeasel"},"edges":[]}]'
+  
+def test_get_documents_paged():
+    authenticate_to_db()
+    response = client.get("/get_documents_paged?collections=sightings&pageSize=10&pageNumber=1")
+    assert response.status_code == 200
 
+def test_search_all_paged():
+    authenticate_to_db()
+    response = client.get("/get_search_all_paged?pageSize=10&pageNumber=1")
+    assert response.status_code == 200
+
+def test_search_all():
+    authenticate_to_db()
+    response = client.get("/get_search_all")
+    assert response.status_code == 200
 
 #UNCLASSIFIED

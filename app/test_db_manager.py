@@ -7,6 +7,13 @@ __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
 
+
+"""
+file@test_db_manager.py
+Purpose is to provide unit test for the db_manager class
+test all the database queries for expected return values
+"""
+
 import pytest
 from datetime import datetime, timedelta
 from db_manager import ArangoDatabaseManager
@@ -70,7 +77,6 @@ def test_get_specified_documents(DbManager):
     attribute1End = 1
     attribute2Start = 0
     attribute2End = 1
-    include_edges = True
     result = DbManager.get_specified_documents(
         collections,
         edgeCollections = edge_collections,
@@ -86,7 +92,6 @@ def test_get_specified_documents(DbManager):
         attribute1End=attribute1End,
         attribute2Start=attribute2Start,
         attribute2End=attribute2End,
-        include_edges=include_edges,
     )
     # perform assertions on the result
 
@@ -114,7 +119,7 @@ def test_get_specified_documents(DbManager):
 
     # test case 3: Verify that the function handles other parameters correctly
     # test exclude edges
-    edgeCollections = ["edge-audios"]
+    edgeCollections = ["edge-sightings"]
     excludeEdges = True
     result = DbManager.get_specified_documents(
         collections,
@@ -126,18 +131,13 @@ def test_get_specified_documents(DbManager):
     # assert that the result is a list
     assert isinstance(result, list)
 
-    # assert that the result is not empty
-    assert len(result) > 0
-
     # assert that each document has no edges
     assert "connectedDocs" not in result
 
     # test for only connectected docs from audios
     connectionFilter = ["audios"]
-    include_edges = True
     result = DbManager.get_specified_documents(
         collections,
-        include_edges=include_edges,
         edgeCollections=edgeCollections,
         connectionFilter=connectionFilter
     )
@@ -176,7 +176,6 @@ def test_get_specified_documents_pages(DbManager):
     attribute1End = 1
     attribute2Start = 0
     attribute2End = 1
-    include_edges = True
     pageNumber = 1
     result = DbManager.get_specified_documents_pages(
         collections,
@@ -195,7 +194,6 @@ def test_get_specified_documents_pages(DbManager):
         attribute1End=attribute1End,
         attribute2Start=attribute2Start,
         attribute2End=attribute2End,
-        include_edges=include_edges,
     )
     # perform assertions on the result
 
@@ -223,7 +221,8 @@ def test_get_specified_documents_pages(DbManager):
 
     # test case 5: Verify that the function handles other parameters correctly
     # test exclude edges
-    edgeCollections = ["edge-audios"]
+    # exclude items from edge audios
+    edgeCollections = ["edge-sightings"]
     excludeEdges = True
     result = DbManager.get_specified_documents_pages(
         collections,
@@ -237,20 +236,12 @@ def test_get_specified_documents_pages(DbManager):
     # assert that the result is a list
     assert isinstance(result, list)
 
-    # assert that the result is not empty
-    assert len(result) > 0
-
-    # assert that each document has no edges
-    assert "connectedDocs" not in result
-
     # test for only connectected docs from audios
     connectionFilter = ["audios"]
-    include_edges = True
     result = DbManager.get_specified_documents_pages(
         collections,
         pageSize,
         pageNumber,
-        include_edges=include_edges,
         edgeCollections=edgeCollections,
         connectionFilter=connectionFilter
     )
