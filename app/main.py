@@ -46,9 +46,11 @@ async def get_document_by_key(key:str,
     Retrieve an item by key.
 
     Args:
+
         key: The datbase key of the item to retrieve.
 
     Returns:
+
         dict: a single document and its edges and connections
     """
     docs = database_manager.get_document_by_key(key, includeEdges)
@@ -61,9 +63,11 @@ async def get_document_by_key(id:str,
     Retrieve an item by ID.
 
     Args:
+
         id: The ID of the item to retrieve.
 
     Returns:
+
         dict: The retrieved item information.
     """
     #gets a single document and its connection by id
@@ -76,9 +80,11 @@ async def get_collection_names():
     Retrieve an item by ID.
 
     Args:
+
         none
 
     Returns:
+
         dict: name of each collection in the database
     """
     return database_manager.get_collection_names()
@@ -91,9 +97,11 @@ async def get_recent(hours_ago:int):
     Retrieves recent documents.
 
     Args:
+
         int: hours_ago 
 
     Returns:
+
         dict: documents with a timestamp that falls within the hours ago
     """
     docs = database_manager.get_recent_documents(hoursAgo = 0 )
@@ -122,23 +130,41 @@ async def get_documents(  collections: str,
     Retrieves filterd search of specified collections, documents.
 
     Args:
+
         collections: str: comma separated list of collections to search
+
         (optional) startTime: str: time range start
+
         (optional) endTime: str: time range end
+
         (optional) longStart: int: longitude range start
+
         (optional) longEnd: int: longitude range end
+
         (optional) latStart: int: latitude range start
+
         (optional) latEnd: latitude range end
+
         (optional) country: str: only include this country in results
+
         (optional) type: str: only include this type in results
+
         (optional) attribute1Start: float: atrribute 1 start range
+        
         (optional) attribute1End: float: atrribute 1 end range
+
         (optional) attribute2Start: float: atrribute 2 start range
+
         (optional) attribute2End: float: atrribute 2 end range
+
         (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+
         (optional) excludeEdges: bool: only return documents without edge connections if true default false
+
         (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others
+
     Returns:
+
         dict: documents, edges, connectedDocuments
         or
         dict: documents
@@ -177,25 +203,45 @@ async def get_documents_paged(  collections: str,
     Retrieves filterd search of specified collections, documents.
 
     Args:
+
         collections: str: comma separated list of collections to search
+
         pageSize: int: amount of results for a page to include
+
         pageNumber: index of page to return
+
         (optional) startTime: str: time range start
+
         (optional) endTime: str: time range end
+
         (optional) longStart: int: longitude range start
+
         (optional) longEnd: int: longitude range end
+
         (optional) latStart: int: latitude range start
+
         (optional) latEnd: latitude range end
+
         (optional) country: str: only include this country in results
+
         (optional) type: str: only include this type in results
+
         (optional) attribute1Start: float: atrribute 1 start range
+
         (optional) attribute1End: float: atrribute 1 end range
+
         (optional) attribute2Start: float: atrribute 2 start range
+
         (optional) attribute2End: float: atrribute 2 end range
+
         (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+
         (optional) excludeEdges: bool: only return documents without edge connections if true default false
+
         (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others
+        
     Returns:
+
         dict: documents, edges, connectedDocuments
         or
         dict: documents
@@ -230,23 +276,39 @@ async def get_search_all_paged(
     Retrieves filterd search of all collections, documents.
 
     Args:
+
         pageSize: int: amount of results for a page to include
+
         pageNumber: index of page to return
+
         (optional) startTime: str: time range start
+
         (optional) endTime: str: time range end
+
         (optional) longStart: int: longitude range start
+
         (optional) longEnd: int: longitude range end
+
         (optional) latStart: int: latitude range start
+
         (optional) latEnd: latitude range end
+
         (optional) country: str: only include this country in results
+
         (optional) type: str: only include this type in results
+
         (optional) attribute1Start: float: atrribute 1 start range
+
         (optional) attribute1End: float: atrribute 1 end range
+
         (optional) attribute2Start: float: atrribute 2 start range
+
         (optional) attribute2End: float: atrribute 2 end range
+
         (optional) includeEdges: true to include edges and connected docs
 
     Returns:
+
         dict: documents, edges, connectedDocuments
         or
         dict: documents
@@ -276,20 +338,35 @@ async def get_search_all(
     Retrieves filterd search of all collections, documents.
 
     Args:
+
         (optional) startTime: str: time range start
+
         (optional) endTime: str: time range end
+
         (optional) longStart: int: longitude range start
+
         (optional) longEnd: int: longitude range end
+
         (optional) latStart: int: latitude range start
+
         (optional) latEnd: latitude range end
+
         (optional) country: str: only include this country in results
+
         (optional) type: str: only include this type in results
+
         (optional) attribute1Start: float: atrribute 1 start range
+
         (optional) attribute1End: float: atrribute 1 end range
+
         (optional) attribute2Start: float: atrribute 2 start range
+
         (optional) attribute2End: float: atrribute 2 end range
+        
         (optional) includeEdges: true to include edges and connected docs
+        
     Returns:
+
         dict: documents, edges, connectedDocuments
         or
         dict: documents
