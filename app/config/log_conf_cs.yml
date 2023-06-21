@@ -8,7 +8,7 @@ formatters:
   access:
     "()": uvicorn.logging.AccessFormatter
     datefmt: "%Y-%m-%dT%H:%M:%S"
-    format: '[%(asctime)s.%(msecs)03dZ] %(client_addr)s - "%(request_line)s" - %(status_code)s - %(name)s -- %(message)s'
+    format: '[%(asctime)s.%(msecs)03dZ] %(client_addr)s - "%(request_line)s - %(status_code)s - %(name)s" -- %(message)s'
 handlers:
   default:
     formatter: default
@@ -37,9 +37,8 @@ loggers:
     level: DEBUG
     handlers:
       - uvicorn_log_file
-      - default
     propagate: yes
-  __main__:
+  '':
     level: DEBUG
     handlers:
       - app_log_file
@@ -49,5 +48,4 @@ loggers:
     level: INFO
     handlers:
       - access
-      - default
     propagate: yes
