@@ -51,7 +51,7 @@ async def get_document_by_key(key:str,
 
     Returns:
 
-        dict: a single document and its edges and connections
+        dict: documents, connected_documents
     """
     docs = database_manager.get_document_by_key(key, includeEdges)
     return docs
@@ -68,7 +68,7 @@ async def get_document_by_key(id:str,
 
     Returns:
 
-        dict: The retrieved item information.
+        dict: documents, connected_documents
     """
     #gets a single document and its connection by id
     docs = database_manager.get_document_by_id(id, includeEdges)
@@ -77,7 +77,7 @@ async def get_document_by_key(id:str,
 @app.get("/get_collection_names")
 async def get_collection_names():
     """
-    Retrieve an item by ID.
+    Retrieve collection names in the database.
 
     Args:
 
@@ -85,7 +85,7 @@ async def get_collection_names():
 
     Returns:
 
-        dict: name of each collection in the database
+        dict: collection_names, edge_collection_names
     """
     return database_manager.get_collection_names()
 
@@ -102,7 +102,7 @@ async def get_recent(hours_ago:int):
 
     Returns:
 
-        dict: documents with a timestamp that falls within the hours ago
+        dict: documents
     """
     docs = database_manager.get_recent_documents(hoursAgo = 0 )
     return docs
@@ -364,7 +364,7 @@ async def get_search_all(
         (optional) attribute2End: float: atrribute 2 end range
         
         (optional) includeEdges: true to include edges and connected docs
-        
+
     Returns:
 
         dict: documents, edges, connectedDocuments
