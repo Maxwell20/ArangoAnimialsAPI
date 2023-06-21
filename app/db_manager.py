@@ -154,9 +154,12 @@ class ArangoDatabaseManager:
                                                 
     def get_document_by_key(self, key, includeEdges):
         """Function: get_document_by_key
-           Purpose: returns the filtered result across a list of collections 
-           Returns:
-        """
+           Purpose:Retrieve an item by key
+            Args:
+                key: The datbase key of the item to retrieve.
+            Returns:
+                dict: documents, connected_documents
+            """
         result = []
         connectedDocs = []
 
@@ -216,8 +219,11 @@ class ArangoDatabaseManager:
     
     def get_document_by_id(self, id, includeEdges):
         """Function: get_document_by_id
-           Purpose: returns the filtered result across a list of collections 
-           Returns:
+           Purpose: Retrieve an item by ID.
+        Args:
+            id: The ID of the item to retrieve.
+        Returns:
+            dict: documents, connected_documents
         """
         result = []
         connectedDocs = []
@@ -278,7 +284,12 @@ class ArangoDatabaseManager:
 
 
     def get_recent_documents(self, hoursAgo):
-        """Return a list of recent documents from the collection
+        """
+        Retrieves recent documents.
+        Args:
+            int: hours_ago 
+        Returns:
+            dict: documents
         """
         dt_start, dt_end = start_end_times_from_hoursago(hoursago=hoursAgo)
         result = []
@@ -302,8 +313,28 @@ class ArangoDatabaseManager:
                                 attribute1End = "", attribute2Start = "",
                                 attribute2End = "", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
-           Purpose: returns the filtered result across a list of collections 
-           Returns:
+           Purpose: Retrieves filterd search of specified collections, documents.
+            Args:
+                collections: str: comma separated list of collections to search
+                (optional) startTime: str: time range start
+                (optional) endTime: str: time range end
+                (optional) longStart: int: longitude range start
+                (optional) longEnd: int: longitude range end
+                (optional) latStart: int: latitude range start
+                (optional) latEnd: latitude range end
+                (optional) country: str: only include this country in results
+                (optional) type: str: only include this type in results
+                (optional) attribute1Start: float: atrribute 1 start range 
+                (optional) attribute1End: float: atrribute 1 end range
+                (optional) attribute2Start: float: atrribute 2 start range
+                (optional) attribute2End: float: atrribute 2 end range
+                (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+                (optional) excludeEdges: bool: only return documents without edge connections if true default false
+                (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others
+            Returns:
+                dict: documents, edges, connectedDocuments
+                or
+                dict: documents
         """
         if len(edgeCollections) > 0 and edgeCollections[0] != '':
             include_edges = True
@@ -415,6 +446,9 @@ class ArangoDatabaseManager:
         return result
     
     def sort_documents(self, documents, num_documents):
+        """
+            Sorts documents in time order and returns most recent
+        """
         if documents:
             if 'doc' in documents[0]:
                 sorted_documents = sorted(documents, key=lambda x: datetime.fromisoformat(x['doc']['timestamp']), reverse=True)
@@ -431,9 +465,31 @@ class ArangoDatabaseManager:
                                 attribute1End = "", attribute2Start = "",
                                 attribute2End = "", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
-           Purpose: returns the filtered result across a list of collections page by page for use with a 
-           paged front end
-        """
+           Purpose: Retrieves filterd search of specified collections, documents.
+            Args:
+                collections: str: comma separated list of collections to search
+                pageSize: int: amount of results for a page to include
+                pageNumber: index of page to return
+                (optional) startTime: str: time range start
+                (optional) endTime: str: time range end
+                (optional) longStart: int: longitude range start
+                (optional) longEnd: int: longitude range end
+                (optional) latStart: int: latitude range start
+                (optional) latEnd: latitude range end
+                (optional) country: str: only include this country in results
+                (optional) type: str: only include this type in results
+                (optional) attribute1Start: float: atrribute 1 start range
+                (optional) attribute1End: float: atrribute 1 end range
+                (optional) attribute2Start: float: atrribute 2 start range
+                (optional) attribute2End: float: atrribute 2 end range
+                (optional) edgeCollections: comma separated list of edge collections to search note: must match in order of collections list
+                (optional) excludeEdges: bool: only return documents without edge connections if true default false
+                (optional) collectionFilter: str: comma separated list of collections to include in connections excludes all others 
+            Returns:
+                dict: documents, edges, connectedDocuments
+                or
+                dict: documents
+         """
         if len(edgeCollections) > 0 and edgeCollections[0] != '':
             include_edges = True
         else:
@@ -562,6 +618,30 @@ class ArangoDatabaseManager:
                                     type="", attribute1Start = "", 
                                     attribute1End = "", attribute2Start = "",
                                     attribute2End = "", include_edges=""):
+        """
+        Retrieves filterd search of all collections, documents.
+
+        Args:
+            pageSize: int: amount of results for a page to include
+            pageNumber: index of page to return
+            (optional) startTime: str: time range start
+            (optional) endTime: str: time range end
+            (optional) longStart: int: longitude range start
+            (optional) longEnd: int: longitude range end
+            (optional) latStart: int: latitude range start
+            (optional) latEnd: latitude range end
+            (optional) country: str: only include this country in results
+            (optional) type: str: only include this type in results
+            (optional) attribute1Start: float: atrribute 1 start range
+            (optional) attribute1End: float: atrribute 1 end range
+            (optional) attribute2Start: float: atrribute 2 start range
+            (optional) attribute2End: float: atrribute 2 end range
+            (optional) includeEdges: true to include edges and connected docs
+        Returns:
+            dict: documents, edges, connectedDocuments
+            or
+            dict: documents
+        """  
         specified_documents = []
         connected_documents = []
         bind_vars = {}
@@ -652,6 +732,27 @@ class ArangoDatabaseManager:
                                     type="", attribute1Start = "", 
                                     attribute1End = "", attribute2Start = "",
                                     attribute2End = "", include_edges=""):
+        """
+        Retrieves filterd search of all collections, documents.
+        Args:
+            (optional) startTime: str: time range start
+            (optional) endTime: str: time range end
+            (optional) longStart: int: longitude range start
+            (optional) longEnd: int: longitude range end
+            (optional) latStart: int: latitude range start
+            (optional) latEnd: latitude range end
+            (optional) country: str: only include this country in results
+            (optional) type: str: only include this type in results
+            (optional) attribute1Start: float: atrribute 1 start range
+            (optional) attribute1End: float: atrribute 1 end range
+            (optional) attribute2Start: float: atrribute 2 start range
+            (optional) attribute2End: float: atrribute 2 end range
+            (optional) includeEdges: true to include edges and connected docs
+        Returns:
+            dict: documents, edges, connectedDocuments
+            or
+            dict: documents
+        """
         specified_documents = []
         connected_documents = []
         bind_vars = {}
