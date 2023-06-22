@@ -6,8 +6,7 @@ __version__ = ""
 __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
-
-
+#UNCLASSIFIED
 """
 file@test_db_manager.py
 Purpose is to provide unit test for the db_manager class
@@ -365,3 +364,4 @@ def test_search_all_collections(DbManager):
     result = DbManager.search_all_collections(include_edges=False)
 
     assert "connectedDocs" not in result
+#UNCLASSIFIED

@@ -6,7 +6,7 @@ __version__ = ""
 __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
-
+#UNCLASSIFIED
 # file@conftest.py
 # file for pytest/unit test config
 def pytest_configure(config):
@@ -22,3 +22,4 @@ def pytest_configure(config):
     os.environ["UVICORN_ssl-cert-reqs"] = "2"
     os.environ["UVICORN_ssl-ca-certs"] = "/home/max/prj/colsa/ArangoAnimalsAPI/app/certs/ca.cer"
     os.environ["UVICORN_log-config"] = "/home/max/prj/colsa/ArangoAnimalsAPI/app/config/log_conf_dev.yml"
+#UNCLASSIFIED
