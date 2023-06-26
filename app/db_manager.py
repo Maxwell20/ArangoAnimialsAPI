@@ -8,8 +8,8 @@ __email__ = "mtwente@colsa.com"
 __status__ = "development"
 
 #UNCLASSIFIED
-#file@db_manager.py
 """ 
+file@db_manager.py
 Base classes and functionality for database management.
 """
 from arango import ArangoClient
@@ -214,8 +214,19 @@ class ArangoDatabaseManager:
                     # break out after all of the edge collections have been searched
                     break 
                     
-
-        return result, connectedDocs
+        # prepare the final result in the desired format
+        formatted_result = []
+        for doc in result:
+            result_item = {
+                "doc": doc,
+                "edges": [],
+                "connectedDocs": []
+            }
+            formatted_result.append(result_item)
+            for connectedDoc in connectedDocs:
+                formatted_result["connectedDocs"].append(connectedDoc)
+        return formatted_result
+        # return result, connectedDocs
     
     def get_document_by_id(self, id, includeEdges):
         """Function: get_document_by_id

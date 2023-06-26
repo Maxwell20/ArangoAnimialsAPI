@@ -7,8 +7,8 @@ __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
 #UNCLASSIFIED
-#file@main.py
 """
+file@main.py
 API Endpoints, support functions and main entry point for the API.
 """
 from fastapi import FastAPI
