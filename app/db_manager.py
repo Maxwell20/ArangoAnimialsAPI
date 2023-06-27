@@ -224,7 +224,7 @@ class ArangoDatabaseManager:
             }
             formatted_result.append(result_item)
             for connectedDoc in connectedDocs:
-                formatted_result["connectedDocs"].append(connectedDoc)
+                formatted_result[0]["connectedDocs"].append(connectedDoc)
         return formatted_result
         # return result, connectedDocs
     

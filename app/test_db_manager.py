@@ -35,8 +35,10 @@ def test_get_document_by_key(DbManager):
     # test case 1: check and see if it returns correct doc
     key = "af03d7e9bf1b9d2d"
     result = DbManager.get_document_by_key(key, False)
-    assert result[0][0]["_key"] == key
-
+    assert result[0]['doc']["_key"] == key
+    # test case 2: check and see if it returns connected docs
+    result = DbManager.get_document_by_key(key, True)
+    assert result[0]['doc']["_key"] == key
 
 def test_get_document_by_id(DbManager):
     # test case 1: check and see if it returns correct doc
@@ -364,4 +366,4 @@ def test_search_all_collections(DbManager):
     result = DbManager.search_all_collections(include_edges=False)
 
     assert "connectedDocs" not in result
-#UNCLASSIFIED
+    #UNCLASSIFIED
