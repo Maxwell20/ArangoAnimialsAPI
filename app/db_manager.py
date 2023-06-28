@@ -290,8 +290,21 @@ class ArangoDatabaseManager:
                     # break out after all of the edge collections have been searched
                     break 
                     
-
-        return result, connectedDocs
+                      
+        # prepare the final result in the desired format
+        formatted_result = []
+        for doc in result:
+            result_item = {
+                "doc": doc,
+                "edges": [],
+                "connectedDocs": []
+            }
+            formatted_result.append(result_item)
+            for connectedDoc in connectedDocs:
+                formatted_result[0]["connectedDocs"].append(connectedDoc)
+        return formatted_result
+    
+        return formatted_result
 
 
     def get_recent_documents(self, hoursAgo):
