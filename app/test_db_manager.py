@@ -6,8 +6,7 @@ __version__ = ""
 __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
-
-
+#UNCLASSIFIED
 """
 file@test_db_manager.py
 Purpose is to provide unit test for the db_manager class
@@ -36,14 +35,21 @@ def test_get_document_by_key(DbManager):
     # test case 1: check and see if it returns correct doc
     key = "af03d7e9bf1b9d2d"
     result = DbManager.get_document_by_key(key, False)
-    assert result[0][0]["_key"] == key
-
+    assert result[0]['doc']["_key"] == key
+    # test case 2: check and see if it returns connected docs
+    result = DbManager.get_document_by_key(key, True)
+    assert result[0]['doc']["_key"] == key
+    assert len(result[0]['connectedDocs']) > 0
 
 def test_get_document_by_id(DbManager):
     # test case 1: check and see if it returns correct doc
     id = "sightings/af03d7e9bf1b9d2d"
     result = DbManager.get_document_by_id(id, False)
-    assert result[0][0]["_id"] == id
+    assert result[0]['doc']["_id"] == id
+    # test case 2: check and see if it returns connected docs
+    result = DbManager.get_document_by_id(id, True)
+    assert result[0]['doc']["_id"] == id
+    assert len(result[0]['connectedDocs']) > 0
 
 def test_get_recent_documents(DbManager):
     # test case 1: Verify that the function returns a list of documents
@@ -365,3 +371,4 @@ def test_search_all_collections(DbManager):
     result = DbManager.search_all_collections(include_edges=False)
 
     assert "connectedDocs" not in result
+    #UNCLASSIFIED
