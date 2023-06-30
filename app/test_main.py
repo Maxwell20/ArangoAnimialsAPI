@@ -16,9 +16,13 @@ test for the database calls already
 """
 
 from fastapi.testclient import TestClient
-from main import app, authenticate_to_db
+from main import app, authenticate_to_db, router
 
-client = TestClient(app)
+client = TestClient(router)
+client.base_url += "/rest"
+client.base_url = client.base_url.rstrip("/") + "/"
+
+#client = TestClient(app)
 def test_read_main():
     authenticate_to_db()
     response = client.get("/")
