@@ -62,7 +62,7 @@ async def get_document_by_key(key:str,
     docs = database_manager.get_document_by_key(key, includeEdges)
     return docs
 
-@app.get("/get_document_by_id")
+@router.get("/get_document_by_id")
 async def get_document_by_key(id:str,
                               includeEdges:bool):
     """
@@ -260,7 +260,7 @@ async def get_documents_paged(  collections: str,
 
     return docs
 
-@app.get("/get_search_all_paged")
+@router.get("/get_search_all_paged")
 async def get_search_all_paged( 
                         pageSize:int ,
                         pageNumber:int,
@@ -324,7 +324,7 @@ async def get_search_all_paged(
 
     return docs
 
-@app.get("/get_search_all")
+@router.get("/get_search_all")
 async def get_search_all( 
                         startTime: str  | None = "",
                         endTime: str | None = "",
