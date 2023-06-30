@@ -7,8 +7,8 @@ __maintainer__ = "Maxwell Twente"
 __email__ = "mtwente@colsa.com"
 __status__ = "development"
 #UNCLASSIFIED
-#file@config_loader.py
 """
+file@config_loader.py
 Config loader loads certificates and ports ect from environment variables.
 Contains clases for authentification certificates and hosting configurations.
 """
@@ -71,3 +71,4 @@ class UvicornConfigEnvironmentVarLoader(BaseUvicornConfigLoader):
         # Probably want to think about how we want to fail here
         except Exception as e:
             raise e
+#UNCLASSIFIED

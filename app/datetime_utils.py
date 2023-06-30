@@ -7,8 +7,8 @@ __maintainer__ = ""
 __email__ = ""
 __status__ = "development"
 #UNCLASSIFIED
-#file@datetime_utils.py
 """
+file@datetime_utils.py
 Datetime utilities
 """
 import datetime
