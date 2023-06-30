@@ -2,17 +2,17 @@ FROM python:3-slim-buster
 
 #arango db environment variables:
 #change these to update db connection service account credentials
-ENV ARANGO_HOST="http://localhost:1234/"
+ENV ARANGO_HOST="http://exo-arangodb:8529/"
 ENV ARANGO_DATABASE="SightingsDatabase"
 ENV ARANGO_USERNAME="root"
 ENV ARANGO_PASSWORD="adbpwd"
 #change these to update the uvicorn prot and host
 ENV UVICORN_HOST="0.0.0.0"
-ENV UVICORN_PORT=443
-
-ENV UVICORN_ssl-certfile="/code/certs/server.cer"
-ENV UVICORN_ssl-keyfile="/code/certs/server.key" 
-ENV UVICORN_ssl-cert-reqs=2 
+ENV UVICORN_PORT="8080"
+ENV reverse_proxy_on="true"
+ENV UVICORN_ssl-certfile="/code/certs/rest_server.cer"
+ENV UVICORN_ssl-keyfile="/code/certs/rest_server.key" 
+ENV UVICORN_ssl-cert-reqs="2" 
 ENV UVICORN_ssl-ca-certs="/code/certs/ca.cer"
 ENV UVICORN_log-config="/code/config/log_conf.yml"
 
@@ -30,4 +30,4 @@ COPY . .
 # CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port=80"]
 CMD ["python", "app/main.py"]
 
-EXPOSE 443
+EXPOSE 8080

@@ -1,18 +1,18 @@
 version: '3.7'
 
 services:
-  arangodb_service:
-    container_name: app-image
+  exo-fast-api:
+    container_name: exo-fast-api-cn
     build:
       context: ./
-      dockerfile: ./Dockerfile
-    image: app-image:latest
-    hostname: localhostdomain.com
+      dockerfile: ./DockerFile
+    image: exo-fast-api:1.0
+    hostname: exo-fast-api
     volumes:
       - ./app/:/code
       - ./app/config/log_conf.yml:/code/config/log_conf.yml
       - ./run_log/:/run_log
     ports:
-      - '80:80'  
-      - '443:443'
+      - '8080:8080'  
+      #- '8043:8043'
     command: python ./main.py

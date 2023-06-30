@@ -11,7 +11,7 @@ __status__ = "development"
 """
 API Endpoints, support functions and main entry point for the API.
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from arango_auth import *
 from db_manager import *
 import uvicorn 
@@ -23,23 +23,29 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 
 app = FastAPI()
+origins = ["https://www.localhostdomain.com/","https://localhost", "https://exo-fast-api/","http://www.localhostdomain.com/","http://localhost", "http://exo-fast-api/"]
 
+router = APIRouter(prefix="/rest")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace "*" with your frontend's domain(s) for production
+    allow_origins=["*"], #origins # ["*"] # Replace ["*"] with your frontend's domain(s) for production <origins>
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
-@app.get("/")
+router = APIRouter(prefix="/rest")
+app.include_router(router)
+
+
+@router.get("/")
 async def root():
     log = logging.getLogger(__name__)
     log.critical('call get http' )
     return {"message": "Hello World"}
 
-@app.get("/get_document_by_key")
+@router.get("/get_document_by_key")
 async def get_document_by_key(key:str,
                               includeEdges:bool,
                               edgeCollection:str | None = ""):
@@ -47,20 +53,20 @@ async def get_document_by_key(key:str,
     docs = database_manager.get_document_by_key(key,includeEdges, edgeCollection)
     return docs
 
-@app.get("/get_collection_names")
+@router.get("/get_collection_names")
 async def get_collection_names():
    return database_manager.get_collection_names()
 
 
 #example only remove later
-@app.get("/get_recent")
+@router.get("/get_recent")
 async def get_recent(hours_ago:int,
                      collections:str):
     docs = database_manager.get_recent_documents(collections, hoursAgo = 0 )
     return docs
 
 #index of collections and corresponding edge collections must match
-@app.get("/get_documents")
+@router.get("/get_documents")
 async def get_documents(  collections: str,
                         startTime: str  | None = "",
                         endTime: str | None = "",
@@ -89,7 +95,7 @@ async def get_documents(  collections: str,
     return docs
 
 #index of collections and corresponding edge collections must match
-@app.get("/get_documents_paged")
+@router.get("/get_documents_paged")
 async def get_documents_paged(  collections: str,
                         pageSize:int ,
                         pageNumber:int,
@@ -149,13 +155,13 @@ if __name__ == '__main__':
     
     log.debug('Proxy is %s' , app_server_config.reverse_proxy_on)
     if bool("true" == app_server_config.reverse_proxy_on.lower()) :
-        uvicorn.run(app, host=app_server_config.host, port=int(app_server_config.port), ssl_keyfile=app_server_config.ssl_keyfile, ssl_certfile=app_server_config.ssl_certfile, log_config=app_server_config.log_config_file)
+        uvicorn.run(router, host=app_server_config.host, port=int(app_server_config.port), log_config=app_server_config.log_config_file)
     else :    
         log.debug('Accepted signing CAs for client cert %s' , app_server_config.ssl_ca_certs)
         log.debug('Server https cert %s' , app_server_config.ssl_keyfile)
         log.debug('Server https private key %s' , app_server_config.ssl_certfile)
         log.debug('logging app_server_config file %s' , app_server_config.log_config_file)
-        uvicorn.run(app, host=app_server_config.host, port=int(app_server_config.port), ssl_ca_certs=app_server_config.ssl_ca_certs, ssl_cert_reqs=int(app_server_config.ssl_cert_reqs), ssl_keyfile=app_server_config.ssl_keyfile, ssl_certfile=app_server_config.ssl_certfile, log_config=app_server_config.log_config_file)
+        uvicorn.run(router, host=app_server_config.host, port=int(app_server_config.port), ssl_ca_certs=app_server_config.ssl_ca_certs, ssl_cert_reqs=int(app_server_config.ssl_cert_reqs), ssl_keyfile=app_server_config.ssl_keyfile, ssl_certfile=app_server_config.ssl_certfile, log_config=app_server_config.log_config_file)
     
 
 #UNCLASSIFIED

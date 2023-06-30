@@ -58,7 +58,8 @@
 
 IMPORTANT
 
-# if windows add this to host file
+# if windows add this to hosts file
+# C:\Windows\System32\drivers\etc\hosts
 ------------
 # localhost name resolution is handled within DNS itself.
 #	127.0.0.1       localhost
