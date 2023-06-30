@@ -383,7 +383,7 @@ async def get_search_all(
 
     return docs
 
-def init_authenticate_to_db():
+def authenticate_to_db():
     global database_manager
     credentials = ArangoCredentialsEnvironmentVarLoader().build_credentials()
     database_manager = ArangoDatabaseManager(
@@ -399,7 +399,7 @@ if __name__ == '__main__':
     #start from main: python main.py
     global database_manager
     global app_server_config
-    database_manager = init_authenticate_to_db()
+    database_manager = authenticate_to_db()
     app_server_config = UvicornConfigEnvironmentVarLoader().build_config()
     # server is not configured yet so logger is also not configured.
     with open(app_server_config.log_config_file, 'r') as stream: 
