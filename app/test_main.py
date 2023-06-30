@@ -45,7 +45,7 @@ def test_get_collection_names():
 
 def test_get_recent():
     authenticate_to_db()
-    response = client.get("/get_recent?hours_ago=24")
+    response = client.get("/rest/get_recent?hours_ago=24")
     assert response.status_code == 200
 
 
