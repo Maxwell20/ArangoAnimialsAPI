@@ -62,8 +62,8 @@
     subjectAltName = @alt_names
 
 [alt_names]
-    DNS.1 = www.exo-fast-api.com
-    DNS.2 = exo-fast-api
+    DNS.1 = www.localhostdomain.com
+    DNS.2 = localhostdomain
 
 [ client ]
     basicConstraints = CA:FALSE
