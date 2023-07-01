@@ -36,21 +36,14 @@ loggers:
   uvicorn.error:
     level: DEBUG
     handlers:
-      - uvicorn_log_file
-    propagate: yes
+      - default
+    propagate: no
   '':
     level: DEBUG
     handlers:
-      - app_log_file
       - default
-    propagate: yes 
-  uvicorn.error:
-    level: DEBUG
-    handlers:
-      - uvicorn_log_file
-    propagate: yes   
   uvicorn.access:
     level: INFO
     handlers:
-      - access
-    propagate: yes
+      - default
+    propagate: no
