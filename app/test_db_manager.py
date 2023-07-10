@@ -92,8 +92,8 @@ def test_get_specified_documents(DbManager):
         longEnd=longEnd,
         latStart=latStart,
         latEnd=latEnd,
-        country=country,
-        type=type_,
+        countries=country,
+        types=type_,
         attribute1Start=attribute1Start,
         attribute1End=attribute1End,
         attribute2Start=attribute2Start,
@@ -149,6 +149,36 @@ def test_get_specified_documents(DbManager):
     )
     for con in document["connectedDocs"]:
         assert not any(item in con["_id"] for item in connectionFilter)
+    #test case 5 multi country and types
+    startTime = "2021-06-09T13:11:08"
+    endTime = "2021-09-09T13:11:08"
+    longStart = -22
+    longEnd = 10
+    latStart = 50
+    latEnd = 81
+    countries = "NorthZone, EquatorialZone"
+    types_ = "RadioactiveWeasel, Eagle"
+    include_edges = True
+    result = DbManager.get_specified_documents(
+        collections,
+        startTime=startTime,
+        endTime=endTime,
+        longStart=longStart,
+        longEnd=longEnd,
+        latStart=latStart,
+        latEnd=latEnd,
+        countries=countries,
+        types=types_
+    )
+    for document in result:
+        assert document["timestamp"] >= startTime
+        assert document["timestamp"] <= endTime
+        assert document["longitude"] >= longStart
+        assert document["longitude"] <= longEnd
+        assert document["latitude"] >= latStart
+        assert document["latitude"] <= latEnd
+        assert document["country"] in countries
+        assert document["species"] in types_
 
 
 
@@ -194,8 +224,8 @@ def test_get_specified_documents_pages(DbManager):
         longEnd=longEnd,
         latStart=latStart,
         latEnd=latEnd,
-        country=country,
-        type=type_,
+        countries=country,
+        types=type_,
         attribute1Start=attribute1Start,
         attribute1End=attribute1End,
         attribute2Start=attribute2Start,
@@ -253,6 +283,40 @@ def test_get_specified_documents_pages(DbManager):
     )
     for con in document["connectedDocs"]:
         assert not any(item in con["_id"] for item in connectionFilter)
+    
+    #test case 6 multi country and types
+    startTime = "2021-06-09T13:11:08"
+    endTime = "2021-09-09T13:11:08"
+    longStart = -22
+    longEnd = 10
+    latStart = 50
+    latEnd = 81
+    countries = "NorthZone, EquatorialZone"
+    types_ = "RadioactiveWeasel, Eagle"
+    include_edges = True
+    pageNumber = 1
+    result = DbManager.get_specified_documents_pages(
+        collections,
+        pageSize=pageSize,
+        pageNumber=pageNumber,
+        startTime=startTime,
+        endTime=endTime,
+        longStart=longStart,
+        longEnd=longEnd,
+        latStart=latStart,
+        latEnd=latEnd,
+        countries=countries,
+        types=types_
+    )
+    for document in result:
+        assert document["timestamp"] >= startTime
+        assert document["timestamp"] <= endTime
+        assert document["longitude"] >= longStart
+        assert document["longitude"] <= longEnd
+        assert document["latitude"] >= latStart
+        assert document["latitude"] <= latEnd
+        assert document["country"] in countries
+        assert document["species"] in types_
 
 
 

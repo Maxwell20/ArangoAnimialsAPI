@@ -183,7 +183,6 @@ class ArangoDatabaseManager:
                         "key": key
                     }
                 )
-
                 if includeEdges and len(result) > 0:
                     for collection in edge_collections:
                         aql_query = """ 
@@ -332,8 +331,8 @@ class ArangoDatabaseManager:
     
     def get_specified_documents(self, collections, startTime="",
                                 endTime="", longStart="", longEnd="",
-                                latStart="", latEnd="", country="",
-                                type="", attribute1Start = "", 
+                                latStart="", latEnd="", countries=None,
+                                types=None, attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
                                 attribute2End = "", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents
@@ -346,7 +345,7 @@ class ArangoDatabaseManager:
                 (optional) longEnd: int: longitude range end
                 (optional) latStart: int: latitude range start
                 (optional) latEnd: latitude range end
-                (optional) country: str: only include this country in results
+                (optional) countries: str[]: only include this country in results
                 (optional) type: str: only include this type in results
                 (optional) attribute1Start: float: atrribute 1 start range 
                 (optional) attribute1End: float: atrribute 1 end range
@@ -364,6 +363,11 @@ class ArangoDatabaseManager:
             include_edges = True
         else:
             include_edges = False
+        
+        if countries:
+            countries = [x.strip() for x in countries.split(",")]
+        if types:
+            types = [x.strip() for x in types.split(",")]
 
         result = []
 
@@ -374,8 +378,6 @@ class ArangoDatabaseManager:
                     "latEnd": latEnd,
                     "longStart": longStart,
                     "longEnd": longEnd,
-                    "country": country,
-                    "species": type,
                     "attribute1Start": attribute1Start,
                     "attribute1End": attribute1End,
                     "attribute2Start": attribute2Start,
@@ -406,8 +408,28 @@ class ArangoDatabaseManager:
                                     FILTER (!@latEnd || doc.latitude <= @latEnd)
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
-                                    FILTER (!@country || doc.country == @country)
-                                    FILTER (!@species || doc.species == @species)
+                                """
+                    if countries:
+                        aql_query += "FILTER ("
+                        first = True
+                        for country in countries:
+                            if first:
+                                aql_query += f"doc.country == '{country}'"
+                            else:
+                                aql_query += f"|| doc.country == {country}"
+                            first = False
+                        aql_query += ")\n"
+                    if types:
+                        aql_query += "FILTER ("
+                        first = True
+                        for type in types:
+                            if first:
+                                aql_query += f"doc.species == '{type}'"
+                            else:
+                                aql_query += f"|| doc.species == '{type}'"
+                            first = False
+                        aql_query += ")\n"
+                    aql_query += """
                                     FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
                                     FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
                                     FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
@@ -424,8 +446,28 @@ class ArangoDatabaseManager:
                                     FILTER (!@latEnd || doc.latitude <= @latEnd)
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
-                                    FILTER (!@country || doc.country == @country)
-                                    FILTER (!@species || doc.species == @species)
+                                """
+                    if countries:
+                        aql_query += "FILTER ("
+                        first = True
+                        for country in countries:
+                            if first:
+                                aql_query += f"doc.country == '{country}'"
+                            else:
+                                aql_query += f"|| doc.country == '{country}'"
+                            first = False
+                        aql_query += ")\n"
+                    if types:
+                        aql_query += "FILTER ("
+                        first = True
+                        for type in types:
+                            if first:
+                                aql_query += f"doc.species == '{type}'"
+                            else:
+                                aql_query += f"|| doc.species == '{type}'"
+                            first = False
+                        aql_query += ")\n"
+                    aql_query += """
                                     FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
                                     FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
                                     FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
@@ -484,8 +526,8 @@ class ArangoDatabaseManager:
     
     def get_specified_documents_pages(self, collections, pageSize=10, pageNumber=1, startTime="",
                                 endTime="", longStart="", longEnd="",
-                                latStart="", latEnd="", country="",
-                                type="", attribute1Start = "", 
+                                latStart="", latEnd="", countries="",
+                                types="", attribute1Start = "", 
                                 attribute1End = "", attribute2Start = "",
                                 attribute2End = "", edgeCollections = "", excludeEdges=False, connectionFilter= None):
         """Function: get_specified_documents_pages
@@ -500,8 +542,8 @@ class ArangoDatabaseManager:
                 (optional) longEnd: int: longitude range end
                 (optional) latStart: int: latitude range start
                 (optional) latEnd: latitude range end
-                (optional) country: str: only include this country in results
-                (optional) type: str: only include this type in results
+                (optional) countries: str[]: only include this country in results
+                (optional) types: str[]: only include this type in results
                 (optional) attribute1Start: float: atrribute 1 start range
                 (optional) attribute1End: float: atrribute 1 end range
                 (optional) attribute2Start: float: atrribute 2 start range
@@ -519,6 +561,11 @@ class ArangoDatabaseManager:
         else:
             include_edges = False
 
+        if countries:
+            countries = [x.strip() for x in countries.split(",")]
+        if types:
+            types = [x.strip() for x in types.split(",")]
+
         result = []
 
         # calculate offset
@@ -533,8 +580,6 @@ class ArangoDatabaseManager:
             "latEnd": latEnd,
             "longStart": longStart,
             "longEnd": longEnd,
-            "country": country,
-            "species": type,
             "attribute1Start": attribute1Start,
             "attribute1End": attribute1End,
             "attribute2Start": attribute2Start,
@@ -566,8 +611,28 @@ class ArangoDatabaseManager:
                                     FILTER (!@latEnd || doc.latitude <= @latEnd)
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
-                                    FILTER (!@country || doc.country == @country)
-                                    FILTER (!@species || doc.species == @species)
+                                """
+                    if countries:
+                        aql_query += "FILTER ("
+                        first = True
+                        for country in countries:
+                            if first:
+                                aql_query += f"doc.country == '{country}'"
+                            else:
+                                aql_query += f"|| doc.country == '{country}'"
+                            first = False
+                        aql_query += ")\n"
+                    if types:
+                        aql_query += "FILTER ("
+                        first = True
+                        for type in types:
+                            if first:
+                                aql_query += f"doc.species == '{type}'"
+                            else:
+                                aql_query += f"|| doc.species == '{type}'"
+                            first = False
+                        aql_query += ")\n"
+                    aql_query += """
                                     FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
                                     FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
                                     FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)
@@ -586,8 +651,28 @@ class ArangoDatabaseManager:
                                     FILTER (!@latEnd || doc.latitude <= @latEnd)
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
-                                    FILTER (!@country || doc.country == @country)
-                                    FILTER (!@species || doc.species == @species)
+                                """
+                    if countries:
+                        aql_query += "FILTER ("
+                        first = True
+                        for country in countries:
+                            if first:
+                                aql_query += f"doc.country == '{country}'"
+                            else:
+                                aql_query += f" || doc.country == '{country}'"
+                            first = False
+                        aql_query += ")\n"
+                    if types:
+                        aql_query += "FILTER ("
+                        first = True
+                        for type in types:
+                            if first:
+                                aql_query += f"doc.species == '{type}'"
+                            else:
+                                aql_query += f"|| doc.species == '{type}'"
+                            first = False
+                        aql_query += ")\n"
+                    aql_query += """
                                     FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
                                     FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
                                     FILTER (!@attribute2Start || doc.attribute2 >= @attribute2Start)

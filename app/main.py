@@ -122,8 +122,8 @@ async def get_documents(  collections: str,
                         longEnd: float | None = "",
                         latStart: float | None = "", 
                         latEnd: float | None = "", 
-                        country:str | None = "",
-                        type:str | None = "",
+                        countries:str | None = "",
+                        types:str | None = "",
                         attribute1Start:float | None = "",
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
@@ -151,9 +151,9 @@ async def get_documents(  collections: str,
 
         (optional) latEnd: latitude range end
 
-        (optional) country: str: only include this country in results
+        (optional) countries: str: comma separated list only include these countries in results
 
-        (optional) type: str: only include this type in results
+        (optional) types: str: comma separated list only include these types in results
 
         (optional) attribute1Start: float: atrribute 1 start range
         
@@ -179,8 +179,7 @@ async def get_documents(  collections: str,
     collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
 
-    
-    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
+    docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, countries, types, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
@@ -195,8 +194,8 @@ async def get_documents_paged(  collections: str,
                         longEnd: float | None = "",
                         latStart: float | None = "", 
                         latEnd: float | None = "", 
-                        country:str | None = "",
-                        type:str | None = "",
+                        countries:str | None = "",
+                        types:str | None = "",
                         attribute1Start:float | None = "",
                         attribute1End:float | None = "",
                         attribute2Start:float | None = "",
@@ -228,9 +227,9 @@ async def get_documents_paged(  collections: str,
 
         (optional) latEnd: latitude range end
 
-        (optional) country: str: only include this country in results
+        (optional) countries: str: comma separated list only include these countries in results
 
-        (optional) type: str: only include this type in results
+        (optional) types: str: comma separated list only include these types in results
 
         (optional) attribute1Start: float: atrribute 1 start range
 
@@ -256,7 +255,7 @@ async def get_documents_paged(  collections: str,
     collectionFilter = collectionFilter.split(",")
     edgeCollections = edgeCollections.split(",")
     
-    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, country, type, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
+    docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, countries, types, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
     return docs
 
