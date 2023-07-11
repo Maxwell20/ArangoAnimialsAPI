@@ -409,6 +409,7 @@ class ArangoDatabaseManager:
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 """
+                    # append country and type to allow for multiple filters ORed together
                     if countries:
                         aql_query += "FILTER ("
                         first = True
@@ -447,6 +448,7 @@ class ArangoDatabaseManager:
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 """
+                    # append country and type to allow for multiple filters ORed together
                     if countries:
                         aql_query += "FILTER ("
                         first = True
@@ -612,6 +614,7 @@ class ArangoDatabaseManager:
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 """
+                    # append country and type to allow for multiple filters ORed together
                     if countries:
                         aql_query += "FILTER ("
                         first = True
@@ -652,6 +655,7 @@ class ArangoDatabaseManager:
                                     FILTER (!@longStart || doc.longitude >= @longStart)
                                     FILTER (!@longEnd || doc.longitude <= @longEnd)
                                 """
+                    # append country and type to allow for multiple filters ORed together
                     if countries:
                         aql_query += "FILTER ("
                         first = True
@@ -672,6 +676,7 @@ class ArangoDatabaseManager:
                                 aql_query += f"|| doc.species == '{type}'"
                             first = False
                         aql_query += ")\n"
+
                     aql_query += """
                                     FILTER (!@attribute1Start || doc.attribute1 >= @attribute1Start)
                                     FILTER (!@attribute1End || doc.attribute1 <= @attribute1End)
@@ -723,8 +728,8 @@ class ArangoDatabaseManager:
     
     def search_all_collections_paged(self, pageSize=10, pageNumber=1, startTime="",
                                     endTime="", longStart="", longEnd="",
-                                    latStart="", latEnd="", country="",
-                                    type="", attribute1Start = "", 
+                                    latStart="", latEnd="", countries="",
+                                    types="", attribute1Start = "", 
                                     attribute1End = "", attribute2Start = "",
                                     attribute2End = "", include_edges=""):
         """
@@ -739,8 +744,8 @@ class ArangoDatabaseManager:
             (optional) longEnd: int: longitude range end
             (optional) latStart: int: latitude range start
             (optional) latEnd: latitude range end
-            (optional) country: str: only include this country in results
-            (optional) type: str: only include this type in results
+            (optional) countries: str: comma separated string only include these countries in results
+            (optional) types: str: comma separated string only include these types in results
             (optional) attribute1Start: float: atrribute 1 start range
             (optional) attribute1End: float: atrribute 1 end range
             (optional) attribute2Start: float: atrribute 2 start range
@@ -753,15 +758,21 @@ class ArangoDatabaseManager:
         """  
         specified_documents = []
         connected_documents = []
-        bind_vars = {}
+
+        # split the counties ant types out of the comma sepparated stings into an array and remove white space     
+        if countries:
+            countries = [x.strip() for x in countries.split(",")]
+        if types:
+            types = [x.strip() for x in types.split(",")]
+
         db_collections = self.get_collection_names()
         collections = db_collections[0]
         edge_collections = db_collections[1]  
         for collection_name in collections:
-            # Initialize the AQL query string
+            # initialize the AQL query string
             query = f"FOR doc IN {collection_name} "
 
-            # Build the filter conditions based on the provided criteria
+            # build the filter conditions based on the provided criteria
             filters = []
             if startTime:
                 filters.append(f"doc.timestamp >= '{startTime}'")
@@ -775,10 +786,28 @@ class ArangoDatabaseManager:
                 filters.append(f"doc.latitude >= {latStart}")
             if latEnd:
                 filters.append(f"doc.latitude <= {latEnd}")
-            if country:
-                filters.append(f"doc.country == '{country}'")
-            if type:
-                filters.append(f"doc.species == '{type}'")
+            if countries:
+                # filters.append(f"doc.country == '{countries}'")
+                filterString = ""
+                first = True
+                for country in countries:
+                    if first:
+                        filterString += f"doc.country == '{country}'"
+                    else:
+                        filterString += f" || doc.country == '{country}'"
+                    first = False
+                filters.append(filterString)
+            if types:
+                # filters.append(f"doc.species == '{types}'")
+                filterString = ""
+                first = True
+                for type in types:
+                    if first:
+                        filterString += f"doc.species == '{type}'"
+                    else:
+                        filterString += f" || doc.species == '{type}'"
+                    first = False
+                filters.append(filterString)
             if attribute1Start:
                 filters.append(f"doc.attribute1 >= {attribute1Start}")
             if attribute1End:
@@ -788,18 +817,18 @@ class ArangoDatabaseManager:
             if attribute2End:
                 filters.append(f"doc.attribute2 <= {attribute2End}")
 
-            # Combine the filter conditions into a single AQL filter string
+            # combine the filter conditions into a single AQL filter string
             if filters:
                 query += "FILTER " + " && ".join(filters) + " "
 
-            # Calculate the skip value based on the page number and page size
+            # calculate the skip value based on the page number and page size
             skip = (pageNumber - 1) * pageSize
 
-            # Append the LIMIT and OFFSET clauses to the AQL query
+            # append the LIMIT and OFFSET clauses to the AQL query
             query += f"LIMIT {skip}, {pageSize} RETURN doc"
 
 
-            # Execute the AQL query to get the specified documents
+            # execute the AQL query to get the specified documents
             documents = self.db.aql.execute(query)
             specified_documents.extend(documents)
 
@@ -837,8 +866,8 @@ class ArangoDatabaseManager:
     
     def search_all_collections(self, startTime="",
                                     endTime="", longStart="", longEnd="",
-                                    latStart="", latEnd="", country="",
-                                    type="", attribute1Start = "", 
+                                    latStart="", latEnd="", countries="",
+                                    types="", attribute1Start = "", 
                                     attribute1End = "", attribute2Start = "",
                                     attribute2End = "", include_edges=""):
         """
@@ -850,8 +879,8 @@ class ArangoDatabaseManager:
             (optional) longEnd: int: longitude range end
             (optional) latStart: int: latitude range start
             (optional) latEnd: latitude range end
-            (optional) country: str: only include this country in results
-            (optional) type: str: only include this type in results
+            (optional) countries: str: comma separated string only include these countries in results
+            (optional) types: str: comma separated string only include these types in results
             (optional) attribute1Start: float: atrribute 1 start range
             (optional) attribute1End: float: atrribute 1 end range
             (optional) attribute2Start: float: atrribute 2 start range
@@ -864,15 +893,21 @@ class ArangoDatabaseManager:
         """
         specified_documents = []
         connected_documents = []
-        bind_vars = {}
+
+        # split the counties ant types out of the comma sepparated stings into an array and remove white space     
+        if countries:
+            countries = [x.strip() for x in countries.split(",")]
+        if types:
+            types = [x.strip() for x in types.split(",")]
+            
         db_collections = self.get_collection_names()
         collections = db_collections[0]
         edge_collections = db_collections[1]  
         for collection_name in collections:
-            # Initialize the AQL query string
+            # initialize the AQL query string
             query = f"FOR doc IN {collection_name} "
 
-            # Build the filter conditions based on the provided criteria
+            # build the filter conditions based on the provided criteria
             filters = []
             if startTime:
                 filters.append(f"doc.timestamp >= '{startTime}'")
@@ -886,10 +921,28 @@ class ArangoDatabaseManager:
                 filters.append(f"doc.latitude >= {latStart}")
             if latEnd:
                 filters.append(f"doc.latitude <= {latEnd}")
-            if country:
-                filters.append(f"doc.country == '{country}'")
-            if type:
-                filters.append(f"doc.species == '{type}'")
+            if countries:
+                # filters.append(f"doc.country == '{countries}'")
+                filterString = ""
+                first = True
+                for country in countries:
+                    if first:
+                        filterString += f"doc.country == '{country}'"
+                    else:
+                        filterString += f" || doc.country == '{country}'"
+                    first = False
+                filters.append(filterString)
+            if types:
+                # filters.append(f"doc.species == '{types}'")
+                filterString = ""
+                first = True
+                for type in types:
+                    if first:
+                        filterString += f"doc.species == '{type}'"
+                    else:
+                        filterString += f" || doc.species == '{type}'"
+                    first = False
+                filters.append(filterString)
             if attribute1Start:
                 filters.append(f"doc.attribute1 >= {attribute1Start}")
             if attribute1End:
@@ -899,22 +952,22 @@ class ArangoDatabaseManager:
             if attribute2End:
                 filters.append(f"doc.attribute2 <= {attribute2End}")
 
-            # Combine the filter conditions into a single AQL filter string
+            # combine the filter conditions into a single AQL filter string
             if filters:
                 query += "FILTER " + " && ".join(filters) + " "
 
-            # Append the LIMIT and OFFSET clauses to the AQL query
+            # append the LIMIT and OFFSET clauses to the AQL query
             query += "RETURN doc"
 
 
-            # Execute the AQL query to get the specified documents
+            # execute the AQL query to get the specified documents
             documents = self.db.aql.execute(query)
             specified_documents.extend(documents)
 
             if include_edges:
-                # Loop through the specified documents and get the connected documents from edge collections
+                # loop through the specified documents and get the connected documents from edge collections
                 for doc in documents:
-                    # Query the edge collections based on the specified document's _id
+                    # query the edge collections based on the specified document's _id
                     for edge_collection in edge_collections:
                         edge_query = f"FOR edge IN {edge_collection} FILTER edge._from == @documentId RETURN edge._to"
                         edge_bind_vars = {"documentId": doc["_id"]}

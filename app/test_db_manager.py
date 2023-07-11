@@ -360,8 +360,8 @@ def test_search_all_collections_paged(DbManager):
         longEnd=longEnd,
         latStart=latStart,
         latEnd=latEnd,
-        country=country,
-        type=type_,
+        countries=country,
+        types=type_,
         include_edges=include_edges
     )
     # perform assertions on the result
@@ -383,6 +383,27 @@ def test_search_all_collections_paged(DbManager):
         assert document['doc']["country"] == country
         assert document["doc"]["species"] == type_
     
+    # test case 5: multiple filters
+    countries = "NorthZone, EquatorialZone"
+    types_ = "RadioactiveWeasel, Eagle"
+    include_edges = True
+    result = DbManager.search_all_collections_paged(
+        pageSize=pageSize,
+        pageNumber=pageNumber,
+        startTime=startTime,
+        endTime=endTime,
+        longStart=longStart,
+        longEnd=longEnd,
+        latStart=latStart,
+        latEnd=latEnd,
+        countries=country,
+        types=type_,
+        include_edges=include_edges
+    )
+    for document in result:
+        assert document['doc']["country"] in countries
+        assert document['doc']["species"] in types_
+    #UNCLASSIFIED
 
 
 def test_search_all_collections(DbManager):
@@ -407,8 +428,8 @@ def test_search_all_collections(DbManager):
         longEnd=longEnd,
         latStart=latStart,
         latEnd=latEnd,
-        country=country,
-        type=type_,
+        countries=country,
+        types=type_,
         include_edges=include_edges
     )
     # perform assertions on the result
@@ -435,4 +456,23 @@ def test_search_all_collections(DbManager):
     result = DbManager.search_all_collections(include_edges=False)
 
     assert "connectedDocs" not in result
+
+    # test case 4: multiple filters
+    countries = "NorthZone, EquatorialZone"
+    types_ = "RadioactiveWeasel, Eagle"
+    include_edges = True
+    result = DbManager.search_all_collections(
+        startTime=startTime,
+        endTime=endTime,
+        longStart=longStart,
+        longEnd=longEnd,
+        latStart=latStart,
+        latEnd=latEnd,
+        countries=country,
+        types=type_,
+        include_edges=include_edges
+    )
+    for document in result:
+        assert document['doc']["country"] in countries
+        assert document['doc']["species"] in types_
     #UNCLASSIFIED
