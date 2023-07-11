@@ -175,9 +175,6 @@ async def get_documents(  collections: str,
         or
         dict: documents
     """
-    collections = collections.split(",")
-    collectionFilter = collectionFilter.split(",")
-    edgeCollections = edgeCollections.split(",")
 
     docs = database_manager.get_specified_documents(collections, startTime, endTime, longStart, longEnd , latStart, latEnd, countries, types, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
@@ -202,7 +199,7 @@ async def get_documents_paged(  collections: str,
                         attribute2End:float | None = "",
                         edgeCollections:str | None = "",
                         excludeEdges:bool | None = "",
-                        collectionFilter:str | None = ""
+                        collectionFilter:str | None = None
                         ):
     """
     Retrieves filterd search of specified collections, documents.
@@ -251,9 +248,6 @@ async def get_documents_paged(  collections: str,
         or
         dict: documents
     """
-    collections = collections.split(",")
-    collectionFilter = collectionFilter.split(",")
-    edgeCollections = edgeCollections.split(",")
     
     docs = database_manager.get_specified_documents_pages(collections, pageSize, pageNumber, startTime, endTime, longStart, longEnd , latStart, latEnd, countries, types, attribute1Start, attribute1End, attribute2Start, attribute2End, edgeCollections, excludeEdges, collectionFilter)
 
@@ -298,9 +292,9 @@ async def get_search_all_paged(
 
         (optional) latEnd: latitude range end
 
-        (optional) country: str: only include this country in results
+        (optional) country: str: comma separated list only include these countries in results
 
-        (optional) type: str: only include this type in results
+        (optional) types: str: comma separated list only include these types in results
 
         (optional) attribute1Start: float: atrribute 1 start range
 
@@ -356,9 +350,9 @@ async def get_search_all(
 
         (optional) latEnd: latitude range end
 
-        (optional) country: str: only include this country in results
+        (optional) country: str: comma separated list only include these countries in results
 
-        (optional) type: str: only include this type in results
+        (optional) types: str: comma separated list only include these types in results
 
         (optional) attribute1Start: float: atrribute 1 start range
 

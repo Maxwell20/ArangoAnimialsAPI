@@ -65,8 +65,8 @@ def test_get_recent_documents(DbManager):
 
 def test_get_specified_documents(DbManager):
     # test case 1: Verify that the function returns a list of documents
-    collections = ["sightings", "audios"]
-    edge_collections = ['edge-sightings', "edge-audios"]
+    collections = "sightings, audios"
+    edge_collections = "edge-sightings, edge-audios"
     result = DbManager.get_specified_documents(collections, edgeCollections = edge_collections)
     assert isinstance(result, list)
 
@@ -125,7 +125,7 @@ def test_get_specified_documents(DbManager):
 
     # test case 3: Verify that the function handles other parameters correctly
     # test exclude edges
-    edgeCollections = ["edge-sightings"]
+    edgeCollections = "edge-sightings"
     excludeEdges = True
     result = DbManager.get_specified_documents(
         collections,
@@ -140,15 +140,17 @@ def test_get_specified_documents(DbManager):
     # assert that each document has no edges
     assert "connectedDocs" not in result
 
-    # test for only connectected docs from audios
-    connectionFilter = ["audios"]
+    # test case 4: for only connectected docs from audios
+    connectionFilter = "audios"
     result = DbManager.get_specified_documents(
         collections,
         edgeCollections=edgeCollections,
         connectionFilter=connectionFilter
     )
-    for con in document["connectedDocs"]:
-        assert not any(item in con["_id"] for item in connectionFilter)
+    for doc in result:
+        for con in doc["connectedDocs"]:
+            assert any(item in con["_id"] for item in connectionFilter)
+
     #test case 5 multi country and types
     startTime = "2021-06-09T13:11:08"
     endTime = "2021-09-09T13:11:08"
@@ -184,8 +186,8 @@ def test_get_specified_documents(DbManager):
 
 def test_get_specified_documents_pages(DbManager):
     # test case 1: Verify that the function returns a list of documents
-    collections = ["sightings", "audios"]
-    edge_collections = ['edge-sightings', "edge-audios"]
+    collections = "sightings, audios"
+    edge_collections = "edge-sightings, edge-audios"
     result = DbManager.get_specified_documents_pages(collections, edgeCollections = edge_collections)
     assert isinstance(result, list)
 
@@ -258,7 +260,7 @@ def test_get_specified_documents_pages(DbManager):
     # test case 5: Verify that the function handles other parameters correctly
     # test exclude edges
     # exclude items from edge audios
-    edgeCollections = ["edge-sightings"]
+    edgeCollections = "edge-sightings"
     excludeEdges = True
     result = DbManager.get_specified_documents_pages(
         collections,
@@ -272,8 +274,8 @@ def test_get_specified_documents_pages(DbManager):
     # assert that the result is a list
     assert isinstance(result, list)
 
-    # test for only connectected docs from audios
-    connectionFilter = ["audios"]
+    # test case 5: for only connectected docs from audios
+    connectionFilter = "audios"
     result = DbManager.get_specified_documents_pages(
         collections,
         pageSize,
@@ -281,8 +283,9 @@ def test_get_specified_documents_pages(DbManager):
         edgeCollections=edgeCollections,
         connectionFilter=connectionFilter
     )
-    for con in document["connectedDocs"]:
-        assert not any(item in con["_id"] for item in connectionFilter)
+    for doc in result:
+        for con in doc["connectedDocs"]:
+            assert any(item in con["_id"] for item in connectionFilter)
     
     #test case 6 multi country and types
     startTime = "2021-06-09T13:11:08"

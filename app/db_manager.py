@@ -345,8 +345,8 @@ class ArangoDatabaseManager:
                 (optional) longEnd: int: longitude range end
                 (optional) latStart: int: latitude range start
                 (optional) latEnd: latitude range end
-                (optional) countries: str[]: only include this country in results
-                (optional) type: str: only include this type in results
+                (optional) countries: str: comma separated string only include these countries in results 
+                (optional) types: str: comma separated string only include these types in results
                 (optional) attribute1Start: float: atrribute 1 start range 
                 (optional) attribute1End: float: atrribute 1 end range
                 (optional) attribute2Start: float: atrribute 2 start range
@@ -359,6 +359,13 @@ class ArangoDatabaseManager:
                 or
                 dict: documents
         """
+        if collections:
+            collections = [x.strip() for x in collections.split(",")]
+        if connectionFilter:
+            connectionFilter = [x.strip() for x in connectionFilter.split(",")]
+        if edgeCollections:
+            edgeCollections = [x.strip() for x in edgeCollections.split(",")]
+        
         if len(edgeCollections) > 0 and edgeCollections[0] != '':
             include_edges = True
         else:
@@ -544,8 +551,8 @@ class ArangoDatabaseManager:
                 (optional) longEnd: int: longitude range end
                 (optional) latStart: int: latitude range start
                 (optional) latEnd: latitude range end
-                (optional) countries: str[]: only include this country in results
-                (optional) types: str[]: only include this type in results
+                (optional) countries: str: comma separated string only include these countries in results
+                (optional) types: str: comma separated string only include these types in results
                 (optional) attribute1Start: float: atrribute 1 start range
                 (optional) attribute1End: float: atrribute 1 end range
                 (optional) attribute2Start: float: atrribute 2 start range
@@ -558,6 +565,14 @@ class ArangoDatabaseManager:
                 or
                 dict: documents
          """
+        if collections:
+            collections = [x.strip() for x in collections.split(",")]
+        if connectionFilter:
+            connectionFilter = [x.strip() for x in connectionFilter.split(",")]
+        if edgeCollections:
+            edgeCollections = [x.strip() for x in edgeCollections.split(",")]
+        
+
         if len(edgeCollections) > 0 and edgeCollections[0] != '':
             include_edges = True
         else:
@@ -899,7 +914,7 @@ class ArangoDatabaseManager:
             countries = [x.strip() for x in countries.split(",")]
         if types:
             types = [x.strip() for x in types.split(",")]
-            
+
         db_collections = self.get_collection_names()
         collections = db_collections[0]
         edge_collections = db_collections[1]  
